@@ -17,6 +17,8 @@ The "Start" button on the control panel to the left of the window kicks off the
 simulation. The other controls alter parameters such as mass, elasticity,
 magnitude of forces and so on.
 
+![Screenshot](screenshot.png "QSpringies")
+
 Building QSpringies
 -------------------
 The file qspringies.pro can be used to build QSpringies with Qt Designer or
