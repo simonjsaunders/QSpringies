@@ -20,8 +20,7 @@
 #include "misc.h"
 #include <math.h>
 
-int massRadius(double m)
-{
+int massRadius(double m) {
     int rad = (int)(2 * log(4.0 * m + 1.0));
 
     if (rad < 1)
@@ -33,8 +32,7 @@ int massRadius(double m)
     return rad /*+ spthick/2*/;
 }
 
-int sphereSize(int rad)
-{
+int sphereSize(int rad) {
     rad = (25 + (2 * rad))/2;
     if (rad < 15)
         rad = 15;
@@ -46,7 +44,6 @@ int sphereSize(int rad)
     return size;
 }
 
-int sphereRadius(int size)
-{
+int sphereRadius(int size) {
     return (size*10 + 30)/2;
 }

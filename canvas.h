@@ -26,8 +26,7 @@
 
 class System;
 
-enum MouseMode
-{
+enum MouseMode {
     ModeEdit,
     ModeMass,
     ModeSpring
@@ -36,8 +35,7 @@ enum MouseMode
 /* Number of previous mouse state saves */
 #define MOUSE_PREV	4
 
-class Canvas : public QWidget
-{
+class Canvas : public QWidget {
     Q_OBJECT
 public:
     explicit Canvas(QWidget *parent = nullptr);
@@ -58,12 +56,10 @@ signals:
     void updateControls();
 
 private:
-    struct Circle
-    {
+    struct Circle {
         int x, y, radius, size;
     };
-    struct MouseInfo
-    {
+    struct MouseInfo {
         int x, y;
         unsigned long time;
     };

@@ -25,13 +25,11 @@
 const double MPROXIMITY	= 8.0;
 const double SPROXIMITY	= 8.0;
 
-System::System()
-{
+System::System() {
     initObjects();
 }
 
-void System::initObjects()
-{
+void System::initObjects() {
     fakeMass_ = createMass();
     masses_[fakeMass_].status = S_FIXED;
     fakeSpring_ = createSpring();
@@ -41,8 +39,7 @@ void System::initObjects()
     springs_[fakeSpring_].m1 = fakeMass_;
 }
 
-void System::attachFakeSpring(int tomass)
-{
+void System::attachFakeSpring(int tomass) {
     addMassParent(fakeMass_, fakeSpring_);
     springs_[fakeSpring_].m2 = tomass;
     springs_[fakeSpring_].status |= S_ALIVE;
@@ -50,13 +47,11 @@ void System::attachFakeSpring(int tomass)
     springs_[fakeSpring_].kd = state_.cur_kd;
 }
 
-void System::killFakeSpring()
-{
+void System::killFakeSpring() {
     springs_[fakeSpring_].status &= ~S_ALIVE;
 }
 
-void System::moveFakeMass(int mx, int my)
-{
+void System::moveFakeMass(int mx, int my) {
     masses_[fakeMass_].x = mx;
     masses_[fakeMass_].y = my;
 }
@@ -64,8 +59,7 @@ void System::moveFakeMass(int mx, int my)
 /* create_mass: return the index for a new mass,
    possibly allocating more space if necesary
    */
-int System::createMass(void)
-{
+int System::createMass() {
     int num = massCount();
     masses_.resize(num + 1);
     return num;
@@ -74,23 +68,19 @@ int System::createMass(void)
 /* create_spring: return the index for a new spring,
    possibly allocating more space if necesary
    */
-int System::createSpring(void)
-{
+int System::createSpring() {
     int num = springCount();
     springs_.resize(num + 1);
     return num;
 }
 
-void System::addMassParent(int which, int parent)
-{
+void System::addMassParent(int which, int parent) {
     masses_[which].parents.push_back(parent);
 }
 
-void System::deleteMassParent(int which, int parent)
-{
+void System::deleteMassParent(int which, int parent) {
     Mass& mass = masses_[which];
-    if (mass.status & S_ALIVE)
-    {
+    if (mass.status & S_ALIVE) {
         auto it = std::find(mass.parents.begin(), mass.parents.end(), parent);
         if (it != mass.parents.end())
             mass.parents.erase(it);
@@ -99,10 +89,8 @@ void System::deleteMassParent(int which, int parent)
 
 /* delete_spring: delete a particular spring
  */
-void System::deleteSpring(int which)
-{
-    if (springs_[which].status & S_ALIVE)
-    {
+void System::deleteSpring(int which) {
+    if (springs_[which].status & S_ALIVE) {
         springs_[which].status = 0;
         deleteMassParent(springs_[which].m1, which);
         deleteMassParent(springs_[which].m2, which);
@@ -112,10 +100,8 @@ void System::deleteSpring(int which)
 /* delete_mass: delete a particular mass, and all springs
    directly attached to it
    */
-void System::deleteMass(int which)
-{
-    if (masses_[which].status & S_ALIVE)
-    {
+void System::deleteMass(int which) {
+    if (masses_[which].status & S_ALIVE) {
         masses_[which].status = 0;
 
         /* Delete all springs connected to it */
@@ -130,40 +116,33 @@ void System::deleteMass(int which)
 /* delete_selected: delete all objects which
    are currently selected
    */
-void System::deleteSelected()
-{
+void System::deleteSelected() {
     int i, n = massCount();
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         if (masses_[i].status & S_SELECTED)
             deleteMass(i);
     }
     n = springCount();
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         if (springs_[i].status & S_SELECTED)
             deleteSpring(i);
     }
 }
 
-void System::deleteAll()
-{
+void System::deleteAll() {
     masses_.clear();
     springs_.clear();
     state_.center_id = -1;
 }
 
-void System::reconnectMasses()
-{
+void System::reconnectMasses() {
     int i, n = massCount();
 
     for (i = 0; i < n; i++)
-    {
         masses_[i].parents.clear();
-    }
+
     n = springCount();
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         addMassParent(springs_[i].m1, i);
         addMassParent(springs_[i].m2, i);
     }
@@ -172,8 +151,7 @@ void System::reconnectMasses()
 /* nearest_object:  Find the nearest spring or mass to the position
    (x,y), or return -1 if none are close.  Set is_mass accordingly
    */
-int System::nearestObject(int x, int y, bool* is_mass)
-{
+int System::nearestObject(int x, int y, bool* is_mass) {
     int i, closest = -1;
     double dist, min_dist = MPROXIMITY * MPROXIMITY, rating, min_rating = DBL_MAX;
     bool masses_only = *is_mass;
@@ -185,17 +163,14 @@ int System::nearestObject(int x, int y, bool* is_mass)
         min_dist = min_dist * 36;
 
     /* Find closest mass */
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         const Mass& m = masses_[i];
-        if (m.status & S_ALIVE)
-        {
+        if (m.status & S_ALIVE) {
             int radius = screenRadius(m.radius);
-            if ((dist = square(m.x - (double)x) + square(m.y - (double)y) - (double)square(radius)) < min_dist)
-            {
+            if ((dist = square(m.x - (double)x) + square(m.y - (double)y)
+                 - (double)square(radius)) < min_dist) {
                 rating = square(m.x - (double)x) + square(m.y - (double)y);
-                if (rating < min_rating)
-                {
+                if (rating < min_rating) {
                     min_dist = dist;
                     min_rating = rating;
                     closest = i;
@@ -216,20 +191,17 @@ int System::nearestObject(int x, int y, bool* is_mass)
     n = springCount();
 
     /* Find closest spring */
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         double x1, x2, y1, y2;
 
-        if (springs_[i].status & S_ALIVE)
-        {
+        if (springs_[i].status & S_ALIVE) {
             x1 = masses_[springs_[i].m1].x;
             y1 = masses_[springs_[i].m1].y;
             x2 = masses_[springs_[i].m2].x;
             y2 = masses_[springs_[i].m2].y;
 
             if (x > std::min(x1, x2) - SPROXIMITY && x < std::max(x1, x2) + SPROXIMITY &&
-                    y > std::min(y1, y2) - SPROXIMITY && y < std::max(y1, y2) + SPROXIMITY)
-            {
+                    y > std::min(y1, y2) - SPROXIMITY && y < std::max(y1, y2) + SPROXIMITY) {
                 double a1, b1, c1, dAB, d;
 
                 a1 = y2 - y1;
@@ -240,8 +212,7 @@ int System::nearestObject(int x, int y, bool* is_mass)
 
                 dist = fabs(d);
 
-                if (dist < min_dist)
-                {
+                if (dist < min_dist) {
                     min_dist = dist;
                     closest = i;
                     *is_mass = false;
@@ -253,29 +224,23 @@ int System::nearestObject(int x, int y, bool* is_mass)
     return closest;
 }
 
-bool System::evalSelection()
-{
+bool System::evalSelection() {
     int i;
     double sel_mass, sel_elas, sel_ks, sel_kd;
     bool sel_fix;
     bool found = false, changed = false;
     bool mass_same, elas_same, ks_same, kd_same, fix_same;
 
-    for (i = 0; i < massCount(); i++)
-    {
-        if (masses_[i].status & S_SELECTED)
-        {
-            if (found)
-            {
+    for (i = 0; i < massCount(); i++) {
+        if (masses_[i].status & S_SELECTED) {
+            if (found) {
                 if (mass_same && masses_[i].mass != sel_mass)
                     mass_same = false;
                 if (elas_same && masses_[i].elastic != sel_elas)
                     elas_same = false;
                 if (fix_same && (masses_[i].status & S_FIXED))
                     fix_same = false;
-            }
-            else
-            {
+            } else {
                 found = true;
                 sel_mass = masses_[i].mass;
                 mass_same = true;
@@ -287,39 +252,30 @@ bool System::evalSelection()
         }
     }
 
-    if (found)
-    {
-        if (mass_same && sel_mass != state_.cur_mass)
-        {
+    if (found) {
+        if (mass_same && sel_mass != state_.cur_mass) {
             state_.cur_mass = sel_mass;
             changed = true;
         }
-        if (elas_same && sel_elas != state_.cur_rest)
-        {
+        if (elas_same && sel_elas != state_.cur_rest) {
             state_.cur_rest = sel_elas;
             changed = true;
         }
-        if (fix_same && sel_fix != state_.fix_mass)
-        {
+        if (fix_same && sel_fix != state_.fix_mass) {
             state_.fix_mass = sel_fix;
             changed = true;
         }
     }
 
     found = false;
-    for (i = 0; i < springCount(); i++)
-    {
-        if (springs_[i].status & S_SELECTED)
-        {
-            if (found)
-            {
+    for (i = 0; i < springCount(); i++) {
+        if (springs_[i].status & S_SELECTED) {
+            if (found) {
                 if (ks_same && springs_[i].ks != sel_ks)
                     ks_same = false;
                 if (ks_same && springs_[i].ks != sel_ks)
                     ks_same = false;
-            }
-            else
-            {
+            } else {
                 found = true;
                 sel_ks = springs_[i].ks;
                 ks_same = true;
@@ -329,15 +285,12 @@ bool System::evalSelection()
         }
     }
 
-    if (found)
-    {
-        if (ks_same && sel_ks != state_.cur_ks)
-        {
+    if (found) {
+        if (ks_same && sel_ks != state_.cur_ks) {
             state_.cur_ks = sel_ks;
             changed = true;
         }
-        if (kd_same && sel_kd != state_.cur_kd)
-        {
+        if (kd_same && sel_kd != state_.cur_kd) {
             state_.cur_kd = sel_kd;
             changed = true;
         }
@@ -346,34 +299,27 @@ bool System::evalSelection()
     return changed;
 }
 
-bool System::anythingSelected() const
-{
+bool System::anythingSelected() const {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
+    for (i = 0; i < massCount(); i++) {
         if (masses_[i].status & S_SELECTED)
             return true;
     }
-    for (i = 0; i < springCount(); i++)
-    {
+    for (i = 0; i < springCount(); i++) {
         if (springs_[i].status & S_SELECTED)
             return true;
     }
     return false;
 }
 
-void System::selectObject(int selection, bool is_mass, bool shifted)
-{
-    if (is_mass)
-    {
+void System::selectObject(int selection, bool is_mass, bool shifted) {
+    if (is_mass) {
         if (shifted)
             masses_[selection].status ^= S_SELECTED;
         else
             masses_[selection].status |= S_SELECTED;
-    }
-    else
-    {
+    } else {
         if (shifted)
             springs_[selection].status ^= S_SELECTED;
         else
@@ -381,72 +327,58 @@ void System::selectObject(int selection, bool is_mass, bool shifted)
     }
 }
 
-void System::selectObjects(int ulx, int uly, int lrx, int lry)
-{
+void System::selectObjects(int ulx, int uly, int lrx, int lry) {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
+    for (i = 0; i < massCount(); i++) {
         const Mass& m = masses_[i];
-        if (m.status & S_ALIVE)
-        {
+        if (m.status & S_ALIVE) {
             if (ulx <= m.x && m.x <= lrx && uly <= m.y && m.y <= lry)
                 selectObject(i, true, false);
         }
     }
 
-    for (i = 0; i < springCount(); i++)
-    {
-        if (springs_[i].status & S_ALIVE)
-        {
+    for (i = 0; i < springCount(); i++) {
+        if (springs_[i].status & S_ALIVE) {
             const Mass& m1 = masses_[springs_[i].m1];
             const Mass& m2 = masses_[springs_[i].m2];
 
             if (ulx <= m1.x && m1.x <= lrx && uly <= m1.y && m1.y <= lry &&
                     ulx <= m2.x && m2.x <= lrx && uly <= m2.y && m2.y <= lry)
-            {
                 selectObject(i, false, false);
-            }
         }
     }
 }
 
-void System::unselectAll()
-{
+void System::unselectAll() {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
+    for (i = 0; i < massCount(); i++) {
         if (masses_[i].status & S_SELECTED)
             masses_[i].status &= ~S_SELECTED;
     }
 
-    for (i = 0; i < springCount(); i++)
-    {
+    for (i = 0; i < springCount(); i++) {
         if (springs_[i].status & S_SELECTED)
             springs_[i].status &= ~S_SELECTED;
     }
 }
 
-void System::selectAll(void)
-{
+void System::selectAll() {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
+    for (i = 0; i < massCount(); i++) {
         if (masses_[i].status & S_ALIVE)
             masses_[i].status |= S_SELECTED;
     }
 
-    for (i = 0; i < springCount(); i++)
-    {
+    for (i = 0; i < springCount(); i++) {
         if (springs_[i].status & S_ALIVE)
             springs_[i].status |= S_SELECTED;
     }
 }
 
-void System::duplicateSelected()
-{
+void System::duplicateSelected() {
     int i, j, num_map, spring_start;
     int which;
 
@@ -455,10 +387,8 @@ void System::duplicateSelected()
     std::vector<int> mapfrom;
     std::vector<int> mapto;
 
-    for (i = 0; i < massCount(); i++)
-    {
-        if (masses_[i].status & S_SELECTED)
-        {
+    for (i = 0; i < massCount(); i++) {
+        if (masses_[i].status & S_SELECTED) {
             which = createMass();
             mapto.push_back(which);
             mapfrom.push_back(i);
@@ -469,33 +399,27 @@ void System::duplicateSelected()
     }
     num_map = mapto.size();
 
-    for (i = 0; i < spring_start; i++)
-    {
-        if (springs_[i].status & S_SELECTED)
-        {
+    for (i = 0; i < spring_start; i++) {
+        if (springs_[i].status & S_SELECTED) {
             bool m1done = false, m2done = false;
 
             which = createSpring();
             springs_[which] = springs_[i];
             springs_[which].status &= ~S_SELECTED;
 
-            for (j = 0; (!m1done || !m2done) && j < num_map; j++)
-            {
-                if (!m1done && springs_[which].m1 == mapfrom[j])
-                {
+            for (j = 0; (!m1done || !m2done) && j < num_map; j++) {
+                if (!m1done && springs_[which].m1 == mapfrom[j]) {
                     springs_[which].m1 = mapto[j];
                     addMassParent(mapto[j], which);
                     m1done = true;
                 }
-                if (!m2done && springs_[which].m2 == mapfrom[j])
-                {
+                if (!m2done && springs_[which].m2 == mapfrom[j]) {
                     springs_[which].m2 = mapto[j];
                     addMassParent(mapto[j], which);
                     m2done = true;
                 }
             }
-            if (!m1done && !m2done)
-            {
+            if (!m1done && !m2done) {
                 /* delete spring that isn't connected to anyone */
                 deleteSpring(which);
             }
@@ -503,35 +427,26 @@ void System::duplicateSelected()
     }
 }
 
-void System::moveSelectedMasses(int dx, int dy)
-{
+void System::moveSelectedMasses(int dx, int dy) {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
-        if (masses_[i].status & S_SELECTED)
-        {
+    for (i = 0; i < massCount(); i++) {
+        if (masses_[i].status & S_SELECTED) {
             masses_[i].x += dx;
             masses_[i].y += dy;
         }
     }
 }
 
-void System::setMassVelocity(int vx, int vy, bool relative)
-{
+void System::setMassVelocity(int vx, int vy, bool relative) {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
-        if (masses_[i].status & S_SELECTED)
-        {
-            if (relative)
-            {
+    for (i = 0; i < massCount(); i++) {
+        if (masses_[i].status & S_SELECTED) {
+            if (relative) {
                 masses_[i].vx += vx;
                 masses_[i].vy += vy;
-            }
-            else
-            {
+            } else {
                 masses_[i].vx = vx;
                 masses_[i].vy = vy;
             }
@@ -539,22 +454,16 @@ void System::setMassVelocity(int vx, int vy, bool relative)
     }
 }
 
-void System::setTempFixed(bool store)
-{
+void System::setTempFixed(bool store) {
     int i;
 
-    for (i = 0; i < massCount(); i++)
-    {
-        if (masses_[i].status & S_SELECTED)
-        {
-            if (store)
-            {
+    for (i = 0; i < massCount(); i++) {
+        if (masses_[i].status & S_SELECTED) {
+            if (store) {
                 masses_[i].status &= ~S_TEMPFIXED;
                 if (!(masses_[i].status & S_FIXED))
                     masses_[i].status |= (S_TEMPFIXED | S_FIXED);
-            }
-            else
-            {
+            } else {
                 if (masses_[i].status & S_TEMPFIXED)
                     masses_[i].status &= ~S_FIXED;
             }
@@ -562,15 +471,12 @@ void System::setTempFixed(bool store)
     }
 }
 
-void System::setRestLenth()
-{
+void System::setRestLenth() {
     int i;
     double dx, dy;
 
-    for (i = 0; i < springCount(); i++)
-    {
-        if (springs_[i].status & S_SELECTED)
-        {
+    for (i = 0; i < springCount(); i++) {
+        if (springs_[i].status & S_SELECTED) {
             dx = masses_[springs_[i].m1].x - masses_[springs_[i].m2].x;
             dy = masses_[springs_[i].m1].y - masses_[springs_[i].m2].y;
             springs_[i].restlen = sqrt(dx * dx + dy * dy);
@@ -578,26 +484,20 @@ void System::setRestLenth()
     }
 }
 
-void System::setCenter()
-{
+void System::setCenter() {
     int i, cent = -1;
 
-    for (i = 0; i < massCount(); i++)
-    {
-        if (masses_[i].status & S_SELECTED)
-        {
+    for (i = 0; i < massCount(); i++) {
+        if (masses_[i].status & S_SELECTED) {
             if (cent != -1)
                 return;
-
             cent = i;
         }
     }
-
     state_.center_id = cent;
 }
 
-void System::reset()
-{
+void System::reset() {
     deleteAll();
     initObjects();
     state_.reset();

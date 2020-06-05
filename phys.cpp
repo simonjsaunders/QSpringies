@@ -27,18 +27,15 @@
 #endif
 
 const double DT_MIN = 0.0001;
-const double DT_MAX	= 0.5;
+const double DT_MAX = 0.5;
 
 /* Stickiness calibration:  STICK_MAG = 1.0, means that a mass = 1.0 with gravity = 1.0 will remain
    stuck on a wall for all stickiness values > 1.0 */
 const double STICK_MAG = 1.0;
 
-Physics::Physics(System& s, int w, int h) : system_(s), width_(w), height_(h)
-{
-}
+Physics::Physics(System& s, int w, int h) : system_(s), width_(w), height_(h) {}
 
-void Physics::accumulateAccel()
-{
+void Physics::accumulateAccel() {
     double gval, gmisc;
     double gx = 0, gy = 0, ogx = 0, ogy = 0;
     double center_x = width_/2.0, center_y = height_/2.0, center_rad = 1.0;
@@ -47,23 +44,18 @@ void Physics::accumulateAccel()
     
     /* ------------------ applied force effects ----------------------- */
 
-    if (mst.center_id >= 0)
-    {
+    if (mst.center_id >= 0) {
         Mass& mass = system_.getMass(mst.center_id);
-        if (mass.status & S_ALIVE)
-        {
+        if (mass.status & S_ALIVE) {
             center_x = mass.x;
             center_y = mass.y;
-        }
-        else
-        {
+        } else {
             mst.center_id = -1;
         }
     }
 
     /* Do gravity */
-    if (mst.force_enabled[FR_GRAV] > 0)
-    {
+    if (mst.force_enabled[FR_GRAV] > 0) {
         gval = mst.cur_grav_val[FR_GRAV];
         gmisc = mst.cur_misc_val[FR_GRAV];
 
@@ -72,17 +64,14 @@ void Physics::accumulateAccel()
     }
     
     /* Keep center of mass in the middle force */
-    if (mst.force_enabled[FR_CMASS] > 0)
-    {
+    if (mst.force_enabled[FR_CMASS] > 0) {
         double mixix = 0.0, mixiy = 0.0, mivix = 0.0, miviy = 0.0, msum = 0.0;
         gval = mst.cur_grav_val[FR_CMASS];
         gmisc = mst.cur_misc_val[FR_CMASS];
 
-        for (i = 0; i < system_.massCount(); i++)
-        {
+        for (i = 0; i < system_.massCount(); i++) {
             Mass& m = system_.getMass(i);
-            if (i != mst.center_id && (m.status & S_ALIVE) && !(m.status & S_FIXED))
-            {
+            if (i != mst.center_id && (m.status & S_ALIVE) && !(m.status & S_FIXED)) {
                 msum += m.mass;
                 mixix += m.mass * m.x;
                 mixiy += m.mass * m.y;
@@ -91,8 +80,7 @@ void Physics::accumulateAccel()
             }
         }
 
-        if (msum)
-        {
+        if (msum) {
             mixix /= msum;
             mixiy /= msum;
             mivix /= msum;
@@ -107,19 +95,14 @@ void Physics::accumulateAccel()
     }
     
     /* Apply Gravity, CM and air drag to all masses */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             /* Do viscous drag */
-            if (i != mst.center_id)
-            {
+            if (i != mst.center_id) {
                 m.ax = gx + ogx - mst.cur_visc * m.vx;
                 m.ay = gy + ogy - mst.cur_visc * m.vy;
-            }
-            else
-            {
+            } else {
                 m.ax = gx - mst.cur_visc * m.vx;
                 m.ay = gy - mst.cur_visc * m.vy;
             }
@@ -127,16 +110,13 @@ void Physics::accumulateAccel()
     }
     
     /* Do point attraction force */
-    if (mst.force_enabled[FR_PTATTRACT] > 0)
-    {
+    if (mst.force_enabled[FR_PTATTRACT] > 0) {
         gval = mst.cur_grav_val[FR_PTATTRACT];
         gmisc = mst.cur_misc_val[FR_PTATTRACT];
 
-        for (i = 0; i < system_.massCount(); i++)
-        {
+        for (i = 0; i < system_.massCount(); i++) {
             Mass& m = system_.getMass(i);
-            if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-            {
+            if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
                 double dx, dy, mag, fmag;
 
                 dx = (center_x - m.x);
@@ -158,41 +138,34 @@ void Physics::accumulateAccel()
     }
     
     /* Wall attract/repel force */
-    if (mst.force_enabled[FR_WALL] > 0)
-    {
+    if (mst.force_enabled[FR_WALL] > 0) {
         double dax, day, dist;
 
         gval = -mst.cur_grav_val[FR_WALL];
         gmisc = mst.cur_misc_val[FR_WALL];
 
-        for (i = 0; i < system_.massCount(); i++)
-        {
+        for (i = 0; i < system_.massCount(); i++) {
             Mass& m = system_.getMass(i);
             int rad = screenRadius(m.radius);
-            if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-            {
+            if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
                 dax = day = 0;
 
-                if (mst.w_left && (dist = m.x - rad) >= 0)
-                {
+                if (mst.w_left && (dist = m.x - rad) >= 0) {
                     if (dist < 1)  dist = 1;
                     dist = pow(dist, gmisc);
                     dax -= gval / dist;
                 }
-                if (mst.w_right && (dist = width_ - rad - m.x) >= 0)
-                {
+                if (mst.w_right && (dist = width_ - rad - m.x) >= 0) {
                     if (dist < 1)  dist = 1;
                     dist = pow(dist, gmisc);
                     dax += gval / dist;
                 }
-                if (mst.w_top && (dist = height_ - rad - m.y) >= 0)
-                {
+                if (mst.w_top && (dist = height_ - rad - m.y) >= 0) {
                     if (dist < 1)  dist = 1;
                     dist = pow(dist, gmisc);
                     day += gval / dist;
                 }
-                if (mst.w_bottom && (dist = m.y - rad) >= 0)
-                {
+                if (mst.w_bottom && (dist = m.y - rad) >= 0) {
                     if (dist < 1)  dist = 1;
                     dist = pow(dist, gmisc);
                     day -= gval / dist;
@@ -207,11 +180,9 @@ void Physics::accumulateAccel()
     /* ------------------ spring effects ----------------------- */
     
     /* Spring compression/damping effects on masses */
-    for (i = 0; i < system_.springCount(); i++)
-    {
+    for (i = 0; i < system_.springCount(); i++) {
         Spring& s = system_.getSpring(i);
-        if (s.status & S_ALIVE)
-        {
+        if (s.status & S_ALIVE) {
             double dx, dy, force, forcex, forcey, mag, damp, mass1, mass2;
 
             Mass& m1 = system_.getMass(s.m1);
@@ -220,13 +191,11 @@ void Physics::accumulateAccel()
             dx = m1.x - m2.x;
             dy = m1.y - m2.y;
 
-            if (dx || dy)
-            {
+            if (dx || dy) {
                 mag = sqrt(dx * dx + dy * dy);
 
                 force = s.ks * (s.restlen - mag);
-                if (s.kd)
-                {
+                if (s.kd)  {
                     damp = ((m1.vx - m2.vx) * dx + (m1.vy - m2.vy) * dy) / mag;
                     force -= s.kd * damp;
                 }
@@ -247,19 +216,16 @@ void Physics::accumulateAccel()
     }
 }
 
-void Physics::rungeKutta(double h, bool testloc)
-{
+void Physics::rungeKutta(double h, bool testloc) {
     int i;
 
     accumulateAccel();
 
     /* k1 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
 
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             /* Initial storage */
             m.cur_x = m.x;
             m.cur_y = m.y;
@@ -281,11 +247,9 @@ void Physics::rungeKutta(double h, bool testloc)
     accumulateAccel();
 
     /* k2 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k2x = m.vx * h;
             m.k2y = m.vy * h;
             m.k2vx = m.ax * h;
@@ -301,11 +265,9 @@ void Physics::rungeKutta(double h, bool testloc)
     accumulateAccel();
 
     /* k3 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k3x = m.vx * h;
             m.k3y = m.vy * h;
             m.k3vx = m.ax * h;
@@ -321,11 +283,9 @@ void Physics::rungeKutta(double h, bool testloc)
     accumulateAccel();
 
     /* k4 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k4x = m.vx * h;
             m.k4y = m.vy * h;
             m.k4vx = m.ax * h;
@@ -334,20 +294,15 @@ void Physics::rungeKutta(double h, bool testloc)
     }
 
     /* Find next position */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
-            if (testloc)
-            {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
+            if (testloc) {
                 m.test_x = m.cur_x + (m.k1x/2.0 + m.k2x + m.k3x + m.k4x/2.0)/3.0;
                 m.test_y = m.cur_y + (m.k1y/2.0 + m.k2y + m.k3y + m.k4y/2.0)/3.0;
                 m.test_vx = m.cur_vx + (m.k1vx/2.0 + m.k2vx + m.k3vx + m.k4vx/2.0)/3.0;
                 m.test_vy = m.cur_vy + (m.k1vy/2.0 + m.k2vy + m.k3vy + m.k4vy/2.0)/3.0;
-            }
-            else
-            {
+            } else {
                 m.x = m.cur_x + (m.k1x/2.0 + m.k2x + m.k3x + m.k4x/2.0)/3.0;
                 m.y = m.cur_y + (m.k1y/2.0 + m.k2y + m.k3y + m.k4y/2.0)/3.0;
                 m.vx = m.cur_vx + (m.k1vx/2.0 + m.k2vx + m.k3vx + m.k4vx/2.0)/3.0;
@@ -362,8 +317,7 @@ void Physics::rungeKutta(double h, bool testloc)
    Nate Loofbourrow (loofbour@cis.ohio-state.edu)
    -------------------- */
 /* Adapted from Numerical Recipes (2nd ed.) pp. 719-720 (RKF45 method). -njl */
-void Physics::adaptiveRungeKutta()
-{
+void Physics::adaptiveRungeKutta() {
     int i;
     double err, errx, erry, errvx, errvy, maxerr, h;
     State& mst = system_.getState();
@@ -379,12 +333,10 @@ restart:
     accumulateAccel();
 
     /* k1 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
 
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             /* Initial storage */
             m.cur_x = m.x;
             m.cur_y = m.y;
@@ -406,11 +358,9 @@ restart:
     accumulateAccel();
 
     /* k2 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k2x = m.vx * h;
             m.k2y = m.vy * h;
             m.k2vx = m.ax * h;
@@ -426,11 +376,9 @@ restart:
     accumulateAccel();
 
     /* k3 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k3x = m.vx * h;
             m.k3y = m.vy * h;
             m.k3vx = m.ax * h;
@@ -446,11 +394,9 @@ restart:
     accumulateAccel();
 
     /* k4 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k4x = m.vx * h;
             m.k4y = m.vy * h;
             m.k4vx = m.ax * h;
@@ -470,11 +416,9 @@ restart:
     accumulateAccel();
 
     /* k5 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k5x = m.vx * h;
             m.k5y = m.vy * h;
             m.k5vx = m.ax * h;
@@ -498,11 +442,9 @@ restart:
     accumulateAccel();
 
     /* k6 step */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.k6x = m.vx * h;
             m.k6y = m.vy * h;
             m.k6vx = m.ax * h;
@@ -512,11 +454,9 @@ restart:
 
     /* Find error */
     maxerr = 0.00001;
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             errx = ((37.0/378.0)-(2825.0/27648.0))*m.k1x +
                     ((250.0/621.0)-(18575.0/48384.0))*m.k3x +
                     ((125.0/594.0)-(13525.0/55296.0))*m.k4x +
@@ -536,28 +476,20 @@ restart:
             err = fabs(errx) + fabs(erry) + fabs(errvx) + fabs(errvy);
 
             if (err > maxerr)
-            {
                 maxerr = err;
-            }
         }
     }
 
     /* Fudgy scale factor -- user controlled */
     maxerr /= mst.cur_prec;
 
-    if (maxerr < 1.0)
-    {
+    if (maxerr < 1.0) {
         mst.cur_dt *= 0.9 * exp(-log(maxerr)/8.0);
-    }
-    else
-    {
-        if (mst.cur_dt > DT_MIN)
-        {
-            for (i = 0; i < system_.massCount(); i++)
-            {
+    } else {
+        if (mst.cur_dt > DT_MIN) {
+            for (i = 0; i < system_.massCount(); i++) {
                 Mass& m = system_.getMass(i);
-                if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-                {
+                if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
                     m.x = m.old_x;
                     m.y = m.old_y;
                     m.vx = m.old_vx;
@@ -572,11 +504,9 @@ restart:
     }
 
     /* Find next position */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.x=m.cur_x + (37.0/378.0)*m.k1x + (250.0/621.0)*m.k3x
                     + (125.0/594.0)*m.k4x + (512.0/1771.0)*m.k6x;
             m.y=m.cur_y + (37.0/378.0)*m.k1y + (250.0/621.0)*m.k3y
@@ -591,8 +521,7 @@ restart:
     }
 }
 
-bool Physics::advance()
-{
+bool Physics::advance() {
     int i;
     double stick_mag;
     static int num_since = 0;
@@ -600,11 +529,9 @@ bool Physics::advance()
     State& mst = system_.getState();
 
     /* Save initial values */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             m.old_x = m.x;
             m.old_y = m.y;
             m.old_vx = m.vx;
@@ -612,15 +539,12 @@ bool Physics::advance()
         }
     }
 
-    if (mst.adaptive_step)
-    {
+    if (mst.adaptive_step) {
         bool any_spring = false;
 
-        for (i = 0; i < system_.springCount(); i++)
-        {
+        for (i = 0; i < system_.springCount(); i++) {
             Spring& s = system_.getSpring(i);
-            if (s.status & S_ALIVE)
-            {
+            if (s.status & S_ALIVE) {
                 any_spring = true;
                 break;
             }
@@ -628,57 +552,45 @@ bool Physics::advance()
 
         /* If no springs, then use dt=DEF_TSTEP */
         if (any_spring)
-        {
             /* check mst.stiff */
             adaptiveRungeKutta();
-        }
         else
-        {
             rungeKutta(mst.cur_dt = DEF_TSTEP, false);
-        }
-    }
-    else
-    {
+    } else {
         rungeKutta(mst.cur_dt, false);
     }
 
     stick_mag = STICK_MAG * mst.cur_dt * mst.cur_stick;
 
     /* Crappy wall code */
-    for (i = 0; i < system_.massCount(); i++)
-    {
+    for (i = 0; i < system_.massCount(); i++) {
         Mass& m = system_.getMass(i);
         int rad = screenRadius(m.radius);
 
-        if ((m.status & S_ALIVE) && !(m.status & S_FIXED))
-        {
+        if ((m.status & S_ALIVE) && !(m.status & S_FIXED)) {
             /* Delete "exploded" objects */
-            if (m.ax - m.ax != 0.0 || m.ay - m.ay != 0.0 || m.x - m.x != 0.0 || m.y - m.y != 0.0)
-            {
+            if (m.ax - m.ax != 0.0 || m.ay - m.ay != 0.0
+                    || m.x - m.x != 0.0 || m.y - m.y != 0.0) {
                 system_.deleteMass(i);
                 continue;
             }
 
             /* Check if stuck to a wall */
-            if (m.old_vx == 0.0 && m.old_vy == 0.0)
-            {
+            if (m.old_vx == 0.0 && m.old_vy == 0.0) {
                 /* Left or right wall */
-                if ((mst.w_left && fabs(m.old_x - rad) < 0.5) || (mst.w_right && fabs(m.old_x - width_ + rad) < 0.5))
-                {
-                    if (fabs(m.vx) < stick_mag / m.mass)
-                    {
+                if ((mst.w_left && fabs(m.old_x - rad) < 0.5)
+                        || (mst.w_right && fabs(m.old_x - width_ + rad) < 0.5)) {
+                    if (fabs(m.vx) < stick_mag / m.mass) {
                         m.vx = m.vy = 0;
                         m.x = m.old_x;
                         m.y = m.old_y;
 
                         continue;
                     }
-                }
-                else if ((mst.w_bottom && fabs(m.old_y - rad) < 0.5) || (mst.w_top && fabs(m.old_y - height_ + rad) < 0.5))
-                {
+                } else if ((mst.w_bottom && fabs(m.old_y - rad) < 0.5)
+                           || (mst.w_top && fabs(m.old_y - height_ + rad) < 0.5)) {
                     /* Top or bottom wall */
-                    if (fabs(m.vy) < stick_mag / m.mass)
-                    {
+                    if (fabs(m.vy) < stick_mag / m.mass) {
                         m.vx = m.vy = 0;
                         m.x = m.old_x;
                         m.y = m.old_y;
@@ -689,87 +601,66 @@ bool Physics::advance()
             }
 
             /* Bounce off left or right wall */
-            if (mst.w_left && m.x < rad && m.old_x >= rad)
-            {
+            if (mst.w_left && m.x < rad && m.old_x >= rad) {
                 m.x = rad;
 
-                if (m.vx < 0)
-                {
+                if (m.vx < 0) {
                     m.vx = -m.vx * m.elastic;
                     m.vy *= m.elastic;
 
                     /* Get stuck if not going fast enough */
-                    if (m.vx > 0)
-                    {
+                    if (m.vx > 0) {
                         m.vx -= STICK_MAG * mst.cur_stick / m.mass;
 
                         if (m.vx < 0)
-                        {
                             m.vx = m.vy = 0;
-                        }
                     }
                 }
-            }
-            else if (mst.w_right && m.x > width_ - rad && m.old_x <= width_ - rad)
-            {
+            } else if (mst.w_right && m.x > width_ - rad && m.old_x <= width_ - rad) {
                 m.x = width_ - rad;
 
-                if (m.vx > 0)
-                {
+                if (m.vx > 0) {
                     m.vx = -m.vx * m.elastic;
                     m.vy *= m.elastic;
 
                     /* Get stuck if not going fast enough */
-                    if (m.vx < 0)
-                    {
+                    if (m.vx < 0) {
                         m.vx += STICK_MAG * mst.cur_stick / m.mass;
 
                         if (m.vx > 0)
-                        {
                             m.vx = m.vy = 0;
-                        }
                     }
                 }
             }
             /* Stick to top or bottom wall */
-            if (mst.w_bottom && m.y < rad && m.old_y >= rad)
-            {
+            if (mst.w_bottom && m.y < rad && m.old_y >= rad) {
                 m.y = rad;
 
-                if (m.vy < 0)
-                {
+                if (m.vy < 0) {
                     m.vy = -m.vy * m.elastic;
                     m.vx *= m.elastic;
 
                     /* Get stuck if not going fast enough */
-                    if (m.vy > 0)
-                    {
+                    if (m.vy > 0) {
                         m.vy -= STICK_MAG * mst.cur_stick / m.mass;
 
                         if (m.vy < 0)
-                        {
                             m.vx = m.vy = 0;
-                        }
                     }
                 }
-            }
-            else if (mst.w_top && m.y > (height_ - rad) && m.old_y <= (height_ - rad))
-            {
+            } else if (mst.w_top && m.y > (height_ - rad) && m.old_y <= (height_ - rad)) {
                 m.y = height_ - rad;
 
-                if (m.vy > 0)
-                {
+                if (m.vy > 0) {
                     m.vy = -m.vy * m.elastic;
                     m.vx *= m.elastic;
 
                     /* Get stuck if not going fast enough */
-                    if (m.vy < 0)
-                    {
+                    if (m.vy < 0) {
                         m.vy += STICK_MAG * mst.cur_stick / m.mass;
 
-                        if (m.vy > 0) {
+                        if (m.vy > 0)
                             m.vx = m.vy = 0;
-                        }
                     }
                 }
             }
@@ -780,13 +671,11 @@ bool Physics::advance()
     /* added by Martin Lukanowicz march 93 luky@ihssv.wsr.ac.at  */
     /* - changed a little by dmd */
     if (mst.collide > 0) {
-        for (i = 0; i < system_.massCount(); i++)
-        {
+        for (i = 0; i < system_.massCount(); i++) {
             int j;
             Mass& m1 = system_.getMass(i);
 
-            if (m1.status & S_ALIVE)
-            {
+            if (m1.status & S_ALIVE) {
                 double m1radius, m2radius, ratio;
                 double dx, dy, dxq, dyq, sumxyq, m1x, m1y, mag;
                 double m1vx, m1vy;
@@ -796,12 +685,10 @@ bool Physics::advance()
                 m1x = m1.x;
                 m1y = m1.y;
 
-                for (j = i+1; j < system_.massCount(); j++)
-                {
+                for (j = i+1; j < system_.massCount(); j++) {
                     Mass& m2 = system_.getMass(j);
 
-                    if (m2.status & S_ALIVE)
-                    {
+                    if (m2.status & S_ALIVE) {
                         m2radius = (m2.status & S_FIXED) ? NAIL_SIZE : m2.radius;
 
                         dx = m2.x - m1x;
@@ -811,19 +698,16 @@ bool Physics::advance()
                         sumxyq = dxq+dyq;
                         mag = sqrt(sumxyq);
 
-                        if (mag < m1radius + m2radius)
-                        {
+                        if (mag < m1radius + m2radius) {
                             m1vx = m1.vx;
                             m1vy = m1.vy;
                             m2vx = m2.vx;
                             m2vy = m2.vy;
 
-                            if ((m1vx-m2vx)*(dx)>0 || (m1vy-m2vy)*(dy)>0)
-                            {
+                            if ((m1vx-m2vx)*(dx)>0 || (m1vy-m2vy)*(dy)>0) {
                                 if (dx == 0) dx = 1e-10;
 
-                                if (!(m1.status & S_FIXED))
-                                {
+                                if (!(m1.status & S_FIXED)) {
                                     if (m2.status & S_FIXED)
                                         ratio = 1+(m1.elastic+m2.elastic)/2;
                                     else
@@ -837,8 +721,7 @@ bool Physics::advance()
                                 }
 
 
-                                if (!(m2.status & S_FIXED))
-                                {
+                                if (!(m2.status & S_FIXED)) {
                                     if (m1.status & S_FIXED)
                                         ratio = 1+(m1.elastic+m2.elastic)/2;
                                     else

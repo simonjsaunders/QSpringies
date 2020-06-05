@@ -19,13 +19,11 @@
 
 #include "state.h"
 
-State::State()
-{
+State::State() {
     reset();
 }
 
-void State::reset()
-{
+void State::reset() {
     cur_mass = 1.0;
     cur_rest = 1.0;
     cur_ks = 1.0;

@@ -29,14 +29,10 @@ int massRadius(double);
 int sphereSize(int);
 int sphereRadius(int);
 
-inline int screenRadius(int radius)
-{
+inline int screenRadius(int radius) {
     return sphereRadius(sphereSize(radius));
 }
 
-inline double square(double x)
-{
-    return x * x;
-}
+inline double square(double x) { return x * x; }
 
 #endif // MISC_H

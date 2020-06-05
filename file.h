@@ -22,8 +22,7 @@
 
 #include <QString>
 
-enum FileCmd
-{
+enum FileCmd {
     FileNone,
     FileLoad,
     FileSave,

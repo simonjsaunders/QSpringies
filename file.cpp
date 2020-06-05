@@ -27,16 +27,14 @@
 #define MAGIC_CMD	"#1.0"
 #define FILE_EXT	".xsp"
 
-QString extendFile(const QString& file)
-{
+QString extendFile(const QString& file) {
     QString result = file;
     if (!result.endsWith(FILE_EXT))
         result += FILE_EXT;
     return result;
 }
 
-bool fileLoad(const QString& fileName, FileCmd command, System& system)
-{
+bool fileLoad(const QString& fileName, FileCmd command, System& system) {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
@@ -60,14 +58,12 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system)
     std::vector<int> mapfrom;
     std::vector<int> mapto;
 
-    while (!in.atEnd())
-    {
+    while (!in.atEnd()) {
         QString cmd;
         in >> cmd;
         if (in.atEnd())
             break;
-        if (cmd == "mass")
-        {
+        if (cmd == "mass") {
             int which = system.createMass();
             mapto.push_back(which);
             Mass& mass = system.getMass(which);
@@ -75,8 +71,7 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system)
             in >> mass_num >> mass.x >> mass.y >> mass.vx >> mass.vy >> mass.mass >> mass.elastic;
             mapfrom.push_back(mass_num);
             num_map++;
-            if (mass.mass < 0)
-            {
+            if (mass.mass < 0) {
                 mass.mass = -mass.mass;
                 mass.status |= S_FIXED;
             }
@@ -86,21 +81,16 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system)
             mass.radius = massRadius(mass.mass);
             if (selectNew)
                 system.selectObject(which, true, false);
-        }
-        else if (cmd == "spng")
-        {
+        } else if (cmd == "spng") {
             int bogus;
             int which = system.createSpring();
             Spring& spring = system.getSpring(which);
             in >> bogus >> spring.m1 >> spring.m2 >> spring.ks >> spring.kd >> spring.restlen;
             if (selectNew)
                 system.selectObject(which, false, false);
-        }
-        else if (command == FileInsert)
-        {
+        } else if (command == FileInsert) {
             /* skip non mass/spring commands if in insert mode */
-        }
-        else if (cmd == "cmas")
+        } else if (cmd == "cmas")
             in >> state.cur_mass;
         else if (cmd == "elas")
             in >> state.cur_rest;
@@ -108,37 +98,28 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system)
             in >> state.cur_ks;
         else if (cmd == "kdmp")
             in >> state.cur_kd;
-        else if (cmd == "fixm")
-        {
+        else if (cmd == "fixm") {
             int temp;
             in >> temp;
             state.fix_mass = temp != 0;
-        }
-        else if (cmd == "shws")
-        {
+        } else if (cmd == "shws") {
             int temp;
             in >> temp;
             state.show_spring = temp != 0;
-        }
-        else if (cmd == "cent")
+        } else if (cmd == "cent")
             in >> state.center_id;
-        else if (cmd == "frce")
-        {
+        else if (cmd == "frce") {
             int which, temp;
             in >> which;
-            if (which >= 0 && which < BF_NUM)
-            {
+            if (which >= 0 && which < BF_NUM) {
                 in >> temp >> state.cur_grav_val[which] >> state.cur_misc_val[which];
                 state.force_enabled[which] = temp != 0;
-            }
-            else if (which == BF_NUM)
-            {
+            } else if (which == BF_NUM) {
                 in >> temp;
                 state.collide = temp != 0;
                 in.readLineInto(0);
             }
-        }
-        else if (cmd == "visc")
+        } else if (cmd == "visc")
             in >> state.cur_visc;
         else if (cmd == "stck")
             in >> state.cur_stick;
@@ -146,57 +127,45 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system)
             in >> state.cur_dt;
         else if (cmd == "prec")
             in >> state.cur_prec;
-        else if (cmd == "adpt")
-        {
+        else if (cmd == "adpt") {
             int temp;
             in >> temp;
             state.adaptive_step = temp != 0;
-        }
-        else if (cmd == "gsnp")
-        {
+        } else if (cmd == "gsnp") {
             int temp;
             in >> state.cur_gsnap >> temp;
             state.grid_snap = temp  != 0;
-        }
-        else if (cmd == "wall")
-        {
+        } else if (cmd == "wall") {
             int wt, wl, wr, wb;
             in >> wt >> wl >> wr >> wb;
             state.w_top = wt != 0;
             state.w_left = wl != 0;
             state.w_right = wr != 0;
             state.w_bottom = wb != 0;
-        }
-        else
-        {
+        } else {
             qWarning("Unknown command: %s\n", qUtf8Printable(cmd));
         }
     }
 
     /* Connect springs to masses */
-    for (int i = spring_start; i < system.springCount(); i++)
-    {
+    for (int i = spring_start; i < system.springCount(); i++) {
         bool m1done = false, m2done = false;
 
         if (system.isFakeSpring(i))
             continue;
 
         Spring& spring = system.getSpring(i);
-        for (int j = 0; (!m1done || !m2done) && j < num_map; j++)
-        {
-            if (!m1done && spring.m1 == mapfrom[j])
-            {
+        for (int j = 0; (!m1done || !m2done) && j < num_map; j++) {
+            if (!m1done && spring.m1 == mapfrom[j]) {
                 spring.m1 = mapto[j];
                 m1done = true;
             }
-            if (!m2done && spring.m2 == mapfrom[j])
-            {
+            if (!m2done && spring.m2 == mapfrom[j]) {
                 spring.m2 = mapto[j];
                 m2done = true;
             }
         }
-        if (!m1done && !m2done)
-        {
+        if (!m1done && !m2done) {
             /* delete spring */
             system.deleteSpring(i);
             fprintf(stderr, "Spring %d not connected to existing mass\n", i);
@@ -206,8 +175,7 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system)
     return true;
 }
 
-bool fileSave(const QString& fileName, System& system)
-{
+bool fileSave(const QString& fileName, System& system) {
     State& state = system.getState();
 
     QFile file(fileName);
@@ -226,8 +194,7 @@ bool fileSave(const QString& fileName, System& system)
     out << "shws " << (state.show_spring ? 1 : 0) << '\n';
     out << "cent " << state.center_id << '\n';
 
-    for (int i = 0; i < BF_NUM; i++)
-    {
+    for (int i = 0; i < BF_NUM; i++) {
         out << "frce " << i << ' ' << (state.force_enabled[i] ? 1 : 0)
             << ' ' << state.cur_grav_val[i] << ' ' << state.cur_misc_val[i] << '\n';
     }
@@ -243,22 +210,18 @@ bool fileSave(const QString& fileName, System& system)
         << (int)state.w_right << ' ' << (int)state.w_bottom << '\n';
 
     /* Masses and springs */
-    for (int i = 0; i < system.massCount(); i++)
-    {
+    for (int i = 0; i < system.massCount(); i++) {
         Mass& mass = system.getMass(i);
-        if (mass.status & S_ALIVE)
-        {
+        if (mass.status & S_ALIVE) {
             out << "mass " << i << ' ' << mass.x << ' ' << mass.y
                 << ' ' << mass.vx << ' ' << mass.vy << ' '
                 << (mass.status & S_FIXED ? -mass.mass : mass.mass)
                 << ' ' << mass.elastic << '\n';
         }
     }
-    for (int i = 0; i < system.springCount(); i++)
-    {
+    for (int i = 0; i < system.springCount(); i++) {
         Spring& spring = system.getSpring(i);
-        if (spring.status & S_ALIVE)
-        {
+        if (spring.status & S_ALIVE) {
             out << "spng " << i << ' ' << spring.m1 << ' ' << spring.m2 << ' '
                 << spring.ks << ' ' << spring.kd << ' ' << spring.restlen << '\n';
         }
@@ -266,8 +229,7 @@ bool fileSave(const QString& fileName, System& system)
     return true;
 }
 
-bool fileCommand(const QString& fileName, FileCmd command, System& system)
-{
+bool fileCommand(const QString& fileName, FileCmd command, System& system) {
     if (command == FileLoad || command == FileInsert)
         return fileLoad(extendFile(fileName), command, system);
     if (command == FileSave)

@@ -28,12 +28,9 @@
 #define S_FIXED		0x04
 #define S_TEMPFIXED	0x08
 
-struct Mass
-{
+struct Mass {
     Mass() : x(0), y(0), vx(0), vy(0), ax(0), ay(0), mass(0),
-        elastic(0), radius(0), status(S_ALIVE)
-    {
-    }
+        elastic(0), radius(0), status(S_ALIVE) {}
     /* Current position, velocity, acceleration */
     double x, y;
     double vx, vy;
@@ -61,11 +58,8 @@ struct Mass
     double k6x, k6y, k6vx, k6vy;
 };
 
-struct Spring
-{
-    Spring() : ks(0), kd(0), restlen(0), m1(0), m2(0), status(S_ALIVE)
-    {
-    }
+struct Spring {
+    Spring() : ks(0), kd(0), restlen(0), m1(0), m2(0), status(S_ALIVE) {}
     /* Ks, Kd and rest length of spring */
     double ks, kd;
     double restlen;
@@ -76,8 +70,7 @@ struct Spring
     int status;
 };
 
-class System
-{
+class System {
 public:
     System();
     void deleteMass(int);
@@ -107,47 +100,17 @@ public:
     void moveFakeMass(int, int);
     void setMassVelocity(int, int, bool);
     void setTempFixed(bool);
-    int massCount() const
-    {
-        return masses_.size();
-    }
-    Mass& getMass(int mass)
-    {
-        return masses_[mass];
-    }
-    const Mass& getMass(int mass) const
-    {
-        return masses_[mass];
-    }
-    int springCount() const
-    {
-        return springs_.size();
-    }
-    Spring& getSpring(int spring)
-    {
-        return springs_[spring];
-    }
-    const Spring& getSpring(int spring) const
-    {
-        return springs_[spring];
-    }
-    State& getState()
-    {
-        return state_;
-    }
-    const State& getState() const
-    {
-        return state_;
-    }
+    int massCount() const { return masses_.size(); }
+    Mass& getMass(int mass) { return masses_[mass]; }
+    const Mass& getMass(int mass) const { return masses_[mass]; }
+    int springCount() const { return springs_.size(); }
+    Spring& getSpring(int spring) { return springs_[spring]; }
+    const Spring& getSpring(int spring) const { return springs_[spring]; }
+    State& getState() { return state_; }
+    const State& getState() const { return state_; }
     void reset();
-    bool isFakeMass(int mass) const
-    {
-        return mass == fakeMass_;
-    }
-    bool isFakeSpring(int spring) const
-    {
-        return spring == fakeSpring_;
-    }
+    bool isFakeMass(int mass) const { return mass == fakeMass_; }
+    bool isFakeSpring(int spring) const { return spring == fakeSpring_; }
 private:
     void initObjects();
     State state_;

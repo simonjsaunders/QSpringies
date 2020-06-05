@@ -29,16 +29,13 @@ const QColor springColor(6, 99, 154);
 const QColor selectedColour(215, 180, 37);
 const int springThickness = 2;
 
-namespace
-{
+namespace {
 
-double distance(const QPoint& p1, const QPoint& p2)
-{
+double distance(const QPoint& p1, const QPoint& p2) {
     return sqrt(square(p1.x() - p2.x()) + square(p1.y() - p2.y()));
 }
 
-QRect getBoundingBox(const QPoint& p1, const QPoint& p2, int margin)
-{
+QRect getBoundingBox(const QPoint& p1, const QPoint& p2, int margin) {
     int x1 = std::min(p1.x(), p2.x()) - margin;
     int y1 = std::min(p1.y(), p2.y()) - margin;
     int x2 = std::max(p1.x(), p2.x()) + margin;
@@ -55,8 +52,7 @@ QRect getBoundingBox(const QPoint& p1, const QPoint& p2, int margin)
 Canvas::Canvas(QWidget *parent) : QWidget(parent), mode_(ModeEdit),
     system_(nullptr), mouseDown_(false), staticSpring_(false), action_(false),
     selection_(-1), mouseOffset_(0), shiftKeyDown_(false),
-    mouseButton_(Qt::NoButton)
-{
+    mouseButton_(Qt::NoButton) {
     spheres_[0].reset(new QPixmap(":/images/sphere30.png"));
     spheres_[1].reset(new QPixmap(":/images/sphere40.png"));
     spheres_[2].reset(new QPixmap(":/images/sphere50.png"));
@@ -69,54 +65,45 @@ Canvas::Canvas(QWidget *parent) : QWidget(parent), mode_(ModeEdit),
     selectedSpheres_[4].reset(new QPixmap(":/images/sel_sphere70.png"));
 }
 
-MouseMode Canvas::mouseMode() const
-{
+MouseMode Canvas::mouseMode() const {
     return mode_;
 }
 
-void Canvas::setMouseMode(MouseMode mode)
-{
+void Canvas::setMouseMode(MouseMode mode) {
     mode_ = mode;
 }
 
-void Canvas::setSystem(System* system)
-{
+void Canvas::setSystem(System* system) {
     system_ = system;
 }
 
-System* Canvas::getSystem()
-{
+System* Canvas::getSystem() {
     return system_;
 }
 
-void Canvas::setAction(bool action)
-{
+void Canvas::setAction(bool action) {
     action_ = action;
 }
 
-void Canvas::paintEvent(QPaintEvent* event)
-{
+void Canvas::paintEvent(QPaintEvent* event) {
     if (pixmap_.get() == 0)
         createPixmap(width(), height());
     QPainter painter(this);
     painter.drawPixmap(event->rect(), *pixmap_.get(), event->rect());
 }
 
-void Canvas::resizeEvent(QResizeEvent* event)
-{
+void Canvas::resizeEvent(QResizeEvent* event) {
     const QSize& size = event->size();
     createPixmap(size.width(), size.height());
 }
 
-void Canvas::createPixmap(int width, int height)
-{
+void Canvas::createPixmap(int width, int height) {
     pixmap_.reset(new QPixmap(width, height));
     systemPixmap_.reset(new QPixmap(width, height));
     drawSystem();
 }
 
-void Canvas::drawMass(int mx, int my, double m)
-{
+void Canvas::drawMass(int mx, int my, double m) {
     int rad = massRadius(m);
     int size = sphereSize(rad);
     rad = sphereRadius(size);
@@ -128,8 +115,7 @@ void Canvas::drawMass(int mx, int my, double m)
     rect_ = target;
 }
 
-void Canvas::drawMass(QPainter& painter, const Circle& circle, bool selected)
-{
+void Canvas::drawMass(QPainter& painter, const Circle& circle, bool selected) {
     int rad = circle.radius;
     int size = circle.size;
     QRect target(circle.x, circle.y, rad * 2, rad * 2);
@@ -137,8 +123,7 @@ void Canvas::drawMass(QPainter& painter, const Circle& circle, bool selected)
     painter.drawPixmap(target, selected ? *selectedSpheres_[size] : *spheres_[size], source);
 }
 
-void Canvas::drawSpring(const QPoint& p1, const QPoint& p2)
-{
+void Canvas::drawSpring(const QPoint& p1, const QPoint& p2) {
     rect_ = getBoundingBox(p1, p2, springThickness);
     QPainter painter(pixmap_.get());
     painter.setRenderHint(QPainter::Antialiasing);
@@ -151,8 +136,7 @@ void Canvas::drawSpring(const QPoint& p1, const QPoint& p2)
     update(rect_);
 }
 
-void Canvas::drawSprings(QPainter& painter, const QVector<QLine>& lines, bool selected)
-{
+void Canvas::drawSprings(QPainter& painter, const QVector<QLine>& lines, bool selected) {
     QPen pen(selected ? selectedColour : springColor);
     pen.setWidth(springThickness);
     pen.setJoinStyle(Qt::RoundJoin);
@@ -161,14 +145,12 @@ void Canvas::drawSprings(QPainter& painter, const QVector<QLine>& lines, bool se
     painter.drawLines(lines);
 }
 
-void Canvas::redraw()
-{
+void Canvas::redraw() {
     drawSystem();
     update();
 }
 
-void Canvas::drawSystem()
-{
+void Canvas::drawSystem() {
     if (system_ == nullptr)
         return;
 
@@ -183,14 +165,11 @@ void Canvas::drawSystem()
     const State& state = system_->getState();
 
     // Draw springs
-    if (state.show_spring)
-    {
+    if (state.show_spring) {
         QVector<QLine> lines, selectedLines;
-        for (int i = 0, n = system_->springCount(); i < n; ++i)
-        {
+        for (int i = 0, n = system_->springCount(); i < n; ++i) {
             const Spring& spring = system_->getSpring(i);
-            if (spring.status & S_ALIVE)
-            {
+            if (spring.status & S_ALIVE) {
                 const Mass& m1 = system_->getMass(spring.m1);
                 const Mass& m2 = system_->getMass(spring.m2);
                 int x1 = COORD_X(m1.x);
@@ -212,18 +191,15 @@ void Canvas::drawSystem()
     // Draw masses
     QVector<Circle> circles, selectedCircles;
 
-    for (int i = 0, n = system_->massCount(); i < n; ++i)
-    {
+    for (int i = 0, n = system_->massCount(); i < n; ++i) {
         const Mass& mass = system_->getMass(i);
-        if (mass.status & S_ALIVE)
-        {
+        if (mass.status & S_ALIVE) {
             bool fixed = (mass.status & S_FIXED) && !(mass.status & S_TEMPFIXED);
             int rad = fixed ? NAIL_SIZE : mass.radius;
             int size = sphereSize(rad);
             rad = sphereRadius(size);
             if (COORD_X(mass.x + rad) >= 0 && COORD_X(mass.x - rad) <= screenWidth &&
-                    COORD_Y(mass.y - rad) >= 0 && COORD_Y(mass.y + rad) <= screenHeight)
-            {
+                    COORD_Y(mass.y - rad) >= 0 && COORD_Y(mass.y + rad) <= screenHeight) {
                 Circle circle;
                 circle.x = COORD_X(mass.x) - rad;
                 circle.y = COORD_Y(mass.y) - rad;
@@ -236,20 +212,17 @@ void Canvas::drawSystem()
             }
         }
     }
-    for (const Circle& circle : circles)
-    {
+    for (const Circle& circle : circles) {
         drawMass(painter, circle, false);
     }
-    for (const Circle& circle : selectedCircles)
-    {
+    for (const Circle& circle : selectedCircles) {
         drawMass(painter, circle, true);
     }
     QPainter painter2(pixmap_.get());
     painter2.drawPixmap(screenRect, *systemPixmap_.get(), screenRect);
 }
 
-void Canvas::mouseMoveEvent(QMouseEvent *event)
-{
+void Canvas::mouseMoveEvent(QMouseEvent *event) {
     if (system_ == nullptr || !mouseDown_)
         return;
 
@@ -263,40 +236,28 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
 
     gridSnap(mx, my);
 
-    if (mode_ == ModeMass)
-    {
+    if (mode_ == ModeMass) {
         const State& state = system_->getState();
         eraseRect(rect_);
         drawMass(mx, my, state.cur_mass);
-    }
-    else if (mode_ == ModeSpring)
-    {
-        if (staticSpring_)
-        {
+    } else if (mode_ == ModeSpring) {
+        if (staticSpring_) {
             eraseRect(rect_);
             QPoint endPoint(mx, my);
             const Mass& m = system_->getMass(selection_);
             QPoint startPoint(COORD_X(m.x), COORD_Y(m.y));
             drawSpring(startPoint, endPoint);
-        }
-        else
-        {
+        } else {
             system_->moveFakeMass(COORD_X(mx), COORD_Y(my));
         }
-    }
-    else if (mode_ == ModeEdit)
-    {
-        if (mouseButton_ == Qt::LeftButton)
-        {
-            if (selection_ < 0)
-            {
+    } else if (mode_ == ModeEdit) {
+        if (mouseButton_ == Qt::LeftButton) {
+            if (selection_ < 0) {
                 eraseRect(rect_);
                 endPoint_ = event->pos();
                 drawRubberBand();
             }
-        }
-        else
-        {
+        } else {
             /* Move objects relative to mouse */
             system_->moveSelectedMasses(COORD_DX(mx - endPoint_.x()), COORD_DY(my - endPoint_.y()));
             redraw();
@@ -305,8 +266,7 @@ void Canvas::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void Canvas::mousePressEvent(QMouseEvent *event)
-{
+void Canvas::mousePressEvent(QMouseEvent *event) {
     if (system_ == nullptr || mouseDown_)
         return;
     shiftKeyDown_ = ((event->modifiers() & Qt::ShiftModifier) != 0);
@@ -316,72 +276,55 @@ void Canvas::mousePressEvent(QMouseEvent *event)
     int mx = event->x();
     int my = event->y();
     gridSnap(mx, my);
-    if (mode_ == ModeMass)
-    {
+    if (mode_ == ModeMass) {
         const State& state = system_->getState();
         drawMass(mx, my, state.cur_mass);
-    }
-    else if (mode_ == ModeSpring)
-    {
+    } else if (mode_ == ModeSpring) {
         bool isMass = true;
         staticSpring_ = (!action_ || mouseButton_ == Qt::RightButton);
         QPoint startPoint(mx, my);
         QPoint endPoint(startPoint);
         selection_ = system_->nearestObject(COORD_X(mx), COORD_Y(my), &isMass);
-        if (selection_ >= 0 && isMass)
-        {
+        if (selection_ >= 0 && isMass) {
             const Mass& m = system_->getMass(selection_);
             startPoint.setX(COORD_X(m.x));
             startPoint.setY(COORD_Y(m.y));
-            if (staticSpring_)
-            {
+            if (staticSpring_) {
                 drawSpring(startPoint, endPoint);
-            }
-            else
-            {
+            } else {
                 system_->attachFakeSpring(selection_);
                 system_->moveFakeMass(COORD_X(mx), COORD_Y(my));
                 redraw();
             }
-        }
-        else
-        {
+        } else {
             mouseDown_ = false;
         }
-    }
-    else if (mode_ == ModeEdit)
-    {
+    } else if (mode_ == ModeEdit) {
         startPoint_ = event->pos();
         endPoint_ = startPoint_;
-        if (mouseButton_ == Qt::LeftButton)
-        {
+        if (mouseButton_ == Qt::LeftButton) {
             bool isMass = false;
             selection_ = system_->nearestObject(COORD_X(mx), COORD_Y(my), &isMass);
 
             /* If not shift clicking, unselect all currently selected items */
-            if (!shiftKeyDown_)
-            {
+            if (!shiftKeyDown_) {
                 system_->unselectAll();
                 redraw();
             }
-        }
-        else
-        {
+        } else {
             system_->setTempFixed(true);
         }
     }
 }
 
-void Canvas::mouseReleaseEvent(QMouseEvent *event)
-{
+void Canvas::mouseReleaseEvent(QMouseEvent *event) {
     if (system_ == nullptr || !mouseDown_)
         return;
     mouseDown_ = false;
     int mx = event->x();
     int my = event->y();
     gridSnap(mx, my);
-    if (mode_ == ModeMass)
-    {
+    if (mode_ == ModeMass) {
         const State& state = system_->getState();
         Mass& m = system_->getMass(system_->createMass());
         m.x = COORD_X((double)mx);
@@ -396,9 +339,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
             system_->unselectAll();
         m.status |= S_SELECTED;
         redraw();
-    }
-    else if (mode_ == ModeSpring)
-    {
+    } else if (mode_ == ModeSpring) {
         const State& state = system_->getState();
         bool isMass = true;
         int startSel = selection_;
@@ -408,8 +349,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
 
         selection_ = system_->nearestObject(COORD_X(mx), COORD_Y(my), &isMass);
         if ((staticSpring_ || !action_ || mouseButton_ == Qt::RightButton)
-                && selection_ >= 0 && isMass && selection_ != startSel)
-        {
+                && selection_ >= 0 && isMass && selection_ != startSel) {
             const Mass& startMass = system_->getMass(startSel);
             const Mass& endMass = system_->getMass(selection_);
 
@@ -433,13 +373,9 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
             spring.status |= S_SELECTED;
         }
         redraw();
-    }
-    else if (mode_ == ModeEdit)
-    {
-        if (mouseButton_ == Qt::LeftButton)
-        {
-            if (selection_ < 0)
-            {
+    } else if (mode_ == ModeEdit) {
+        if (mouseButton_ == Qt::LeftButton) {
+            if (selection_ < 0) {
                 system_->selectObjects(std::min(COORD_X(startPoint_.x()), COORD_X(mx)),
                                         std::min(COORD_Y(startPoint_.y()), COORD_Y(my)),
                                         std::max(COORD_X(startPoint_.x()), COORD_X(mx)),
@@ -447,27 +383,20 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
                 if (system_->evalSelection())
                     emit updateControls();
                 redraw();
-            }
-            else
-            {
+            } else {
                 bool isMass = false;
                 selection_ = system_->nearestObject(COORD_X(mx), COORD_Y(my), &isMass);
-                if (selection_ >= 0)
-                {
+                if (selection_ >= 0) {
                     system_->selectObject(selection_, isMass, shiftKeyDown_);
                     if (system_->evalSelection())
                         emit updateControls();
                     redraw();
                 }
             }
-        }
-        else if (mouseButton_ == Qt::MiddleButton)
-        {
+        } else if (mouseButton_ == Qt::MiddleButton) {
             system_->setTempFixed(false);
             redraw();
-        }
-        else if (mouseButton_ == Qt::RightButton)
-        {
+        } else if (mouseButton_ == Qt::RightButton) {
             int mvx, mvy;
             mouseVelocity(mvx, mvy);
             system_->setMassVelocity(COORD_DX(mvx), COORD_DY(mvy), false);
@@ -477,15 +406,13 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void Canvas::eraseRect(const QRect& rect)
-{
+void Canvas::eraseRect(const QRect& rect) {
     QPainter painter(pixmap_.get());
     painter.drawPixmap(rect, *systemPixmap_.get(), rect);
     update(rect);
 }
 
-void Canvas::drawRubberBand()
-{
+void Canvas::drawRubberBand() {
     QRect rect(getBoundingBox(startPoint_, endPoint_, 0));
     QRect outside(rect.adjusted(-1, -1, 1, 1));
     QPainter painter(pixmap_.get());
@@ -495,41 +422,35 @@ void Canvas::drawRubberBand()
     rect_ = outside;
 }
 
-void Canvas::gridSnap(int& x, int& y)
-{
+void Canvas::gridSnap(int& x, int& y) {
     if (system_ == nullptr)
         return;
     const State& state = system_->getState();
-    if (state.grid_snap && mode_ != ModeEdit)
-    {
+    if (state.grid_snap && mode_ != ModeEdit) {
         int gsnap = state.cur_gsnap;
         x = ((x + (int)gsnap / 2) / (int)gsnap) * (int)gsnap;
         y = ((y + (int)gsnap / 2) / (int)gsnap) * (int)gsnap;
     }
 }
 
-void Canvas::mouseVelocity(int& mx, int& my)
-{
+void Canvas::mouseVelocity(int& mx, int& my) {
     int i, totalx = 0, totaly = 0, scale = 0, dx, dy, dt;
     int fudge = 256;
 
-    for (i = 0; i < MOUSE_PREV - 1; i++)
-    {
+    for (i = 0; i < MOUSE_PREV - 1; i++) {
         const MouseInfo& m1 = mousePrev_[(mouseOffset_ + 2 + i) % MOUSE_PREV];
         const MouseInfo& m2 = mousePrev_[(mouseOffset_ + 1 + i) % MOUSE_PREV];
         dx = m1.x - m2.x;
         dy = m1.y - m2.y;
         dt = m1.time - m2.time;
-        if (dt != 0)
-        {
+        if (dt != 0) {
             scale += 64 * i * i;
             totalx += 64 * i * i * fudge * dx / dt;
             totaly += 64 * i * i * fudge * dy / dt;
         }
     }
 
-    if (scale)
-    {
+    if (scale) {
         totalx /= scale;
         totaly /= scale;
     }

@@ -29,8 +29,7 @@
 #define FR_PTATTRACT	2
 #define FR_WALL		3
 
-struct State
-{
+struct State {
     State();
     void reset();
     double cur_mass, cur_rest;

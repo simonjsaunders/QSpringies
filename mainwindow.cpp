@@ -29,31 +29,26 @@
 #include <QSettings>
 #include <QTimer>
 
-bool updateBoolValue(bool& value, int state)
-{
+bool updateBoolValue(bool& value, int state) {
     bool newValue = (state == Qt::Checked);
-    if (value != newValue)
-    {
+    if (value != newValue) {
         value = newValue;
         return true;
     }
     return false;
 }
 
-void setChecked(QCheckBox* checkBox, bool checked)
-{
+void setChecked(QCheckBox* checkBox, bool checked) {
     QSignalBlocker blocker(checkBox);
     checkBox->setChecked(checked);
 }
 
-void setValue(QDoubleSpinBox* spinBox, double value)
-{
+void setValue(QDoubleSpinBox* spinBox, double value) {
     QSignalBlocker blocker(spinBox);
     spinBox->setValue(value);
 }
 
-void setValue(QSpinBox* spinBox, int value)
-{
+void setValue(QSpinBox* spinBox, int value) {
     QSignalBlocker blocker(spinBox);
     spinBox->setValue(value);
 }
@@ -61,8 +56,7 @@ void setValue(QSpinBox* spinBox, int value)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
-    force_(0)
-{
+    force_(0) {
     ui->setupUi(this);
 
     ui->canvas->setSystem(&system_);
@@ -135,13 +129,11 @@ MainWindow::MainWindow(QWidget *parent)
     readSettings();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::readSettings()
-{
+void MainWindow::readSettings() {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
     if (!geometry.isEmpty())
@@ -149,20 +141,17 @@ void MainWindow::readSettings()
     currentDirectory_ = settings.value("directory", "").toString();
 }
 
-void MainWindow::writeSettings()
-{
+void MainWindow::writeSettings() {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("directory", currentDirectory_);
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
-{
+void MainWindow::closeEvent(QCloseEvent* /*event*/) {
     writeSettings();
 }
 
-void MainWindow::about()
-{
+void MainWindow::about() {
    QMessageBox::about(this, tr("About QSpringies"),
         tr("<p>QSpringies Version %1</p>"
            "<p>Copyright &copy; %2 Simon J. Saunders</p>"
@@ -182,18 +171,15 @@ void MainWindow::about()
            ).arg(QStringLiteral(VERSION_NUMBER), QStringLiteral(COPYRIGHT_YEAR)));
 }
 
-void MainWindow::aboutQt()
-{
+void MainWindow::aboutQt() {
    QMessageBox::aboutQt(this, tr("About Qt"));
 }
 
-void MainWindow::fileOpen()
-{
+void MainWindow::fileOpen() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), currentDirectory_, tr("XSpringies (*.xsp)"));
     if (fileName.isEmpty())
         return;
-    if (!fileCommand(fileName, FileLoad, system_))
-    {
+    if (!fileCommand(fileName, FileLoad, system_)) {
         QMessageBox::critical(this, tr("Error"), tr("Open file failed."));
         return;
     }
@@ -202,16 +188,14 @@ void MainWindow::fileOpen()
     setCurrentFile(fileName);
 }
 
-void MainWindow::setCurrentFile(const QString& fileName)
-{
+void MainWindow::setCurrentFile(const QString& fileName) {
     fileName_ = fileName;
     QFileInfo fi(fileName);
     currentDirectory_ = fi.absolutePath();
     statusBar()->showMessage(tr("Current file: ") + fileName_);
 }
 
-void MainWindow::fileInsert()
-{
+void MainWindow::fileInsert() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Insert File"), currentDirectory_, tr("XSpringies (*.xsp)"));
     if (fileName.isEmpty())
         return;
@@ -220,100 +204,83 @@ void MainWindow::fileInsert()
     ui->canvas->redraw();
 }
 
-void MainWindow::fileSave()
-{
+void MainWindow::fileSave() {
     if (fileName_.isEmpty())
         fileSaveAs();
     else if (!fileCommand(fileName_, FileSave, system_))
         QMessageBox::critical(this, tr("Error"), tr("Save file failed."));
 }
 
-void MainWindow::fileSaveAs()
-{
+void MainWindow::fileSaveAs() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), currentDirectory_, tr("XSpringies (*.xsp)"));
     if (fileName.isEmpty())
         return;
-    if (!fileCommand(fileName, FileSave, system_))
-    {
+    if (!fileCommand(fileName, FileSave, system_)) {
         QMessageBox::critical(this, tr("Error"), tr("Save file failed."));
         return;
     }
     setCurrentFile(fileName);
 }
 
-void MainWindow::setRestLen()
-{
+void MainWindow::setRestLen() {
     system_.setRestLenth();
 }
 
-void MainWindow::setCenter()
-{
+void MainWindow::setCenter() {
     system_.setCenter();
     ui->canvas->redraw();
 }
 
-void MainWindow::editDelete()
-{
+void MainWindow::editDelete() {
     system_.deleteSelected();
     ui->canvas->redraw();
 }
 
-void MainWindow::editDuplicate()
-{
+void MainWindow::editDuplicate() {
     system_.duplicateSelected();
     ui->canvas->redraw();
 }
 
-void MainWindow::editSelectAll()
-{
+void MainWindow::editSelectAll() {
     system_.selectAll();
     if (system_.evalSelection())
         updateControls();
     ui->canvas->redraw();
 }
 
-void MainWindow::stateRestore()
-{
+void MainWindow::stateRestore() {
     system_ = savedSystem_;
     updateControls();
     ui->canvas->redraw();
 }
 
-void MainWindow::stateReset()
-{
+void MainWindow::stateReset() {
     system_.reset();
     updateControls();
     ui->canvas->redraw();
 }
 
-void MainWindow::stateSave()
-{
+void MainWindow::stateSave() {
     savedSystem_ = system_;
 }
 
-void MainWindow::start()
-{
-    if (timer_->isActive())
-    {
+void MainWindow::start() {
+    if (timer_->isActive()) {
         timer_->stop();
         ui->canvas->setAction(false);
         ui->startButton->setText(tr("Start"));
-    }
-    else
-    {
+    } else {
         timer_->start();
         ui->canvas->setAction(true);
         ui->startButton->setText(tr("Stop"));
     }
 }
 
-void MainWindow::tick()
-{
+void MainWindow::tick() {
     int width = ui->canvas->width();
     int height = ui->canvas->height();
     Physics phys(system_, width, height);
-    if (phys.advance())
-    {
+    if (phys.advance()) {
         ui->canvas->redraw();
         State& st = system_.getState();
         if (st.adaptive_step)
@@ -321,8 +288,7 @@ void MainWindow::tick()
     }
 }
 
-void MainWindow::forceComboChanged(int index)
-{
+void MainWindow::forceComboChanged(int index) {
     static const char *forceNames[BF_NUM] = { "Gravity:", "Magnitude:", "Magnitude:", "Magnitude:" };
     static const char *miscNames[BF_NUM] = { "Direction:", "Damping:", "Exponent:", "Exponent:" };
     static double maxForceValue[BF_NUM] = { 10000000.0, 10000000.0, 10000000.0, 10000000.0 };
@@ -338,22 +304,19 @@ void MainWindow::forceComboChanged(int index)
     updateForceControls();
 }
 
-void MainWindow::forceCheckBoxChanged(int state)
-{
+void MainWindow::forceCheckBoxChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.force_enabled[force_], state);
 }
 
-void MainWindow::updateForceControls()
-{
+void MainWindow::updateForceControls() {
     State& state = system_.getState();
     setChecked(ui->forceCheckBox, state.force_enabled[force_]);
     setValue(ui->forceSpinBox, state.cur_grav_val[force_]);
     setValue(ui->miscSpinBox, state.cur_misc_val[force_]);
 }
 
-void MainWindow::updateControls()
-{
+void MainWindow::updateControls() {
     State& state = system_.getState();
     setValue(ui->massSpinBox, state.cur_mass);
     setValue(ui->elasticitySpinBox, state.cur_rest);
@@ -376,38 +339,29 @@ void MainWindow::updateControls()
     updateForceControls();
 }
 
-void MainWindow::editButtonClicked()
-{
+void MainWindow::editButtonClicked() {
     ui->canvas->setMouseMode(ModeEdit);
 }
 
-void MainWindow::massButtonClicked()
-{
+void MainWindow::massButtonClicked() {
     ui->canvas->setMouseMode(ModeMass);
 }
 
-void MainWindow::springButtonClicked()
-{
+void MainWindow::springButtonClicked() {
     ui->canvas->setMouseMode(ModeSpring);
 }
 
-void MainWindow::fixedMassChanged(int state)
-{
+void MainWindow::fixedMassChanged(int state) {
     State& st = system_.getState();
     if (!updateBoolValue(st.fix_mass, state))
         return;
-    for (int i = 0; i < system_.massCount(); i++)
-    {
+    for (int i = 0; i < system_.massCount(); i++) {
         Mass& mass = system_.getMass(i);
-        if (mass.status & S_SELECTED)
-        {
-            if (st.fix_mass)
-            {
+        if (mass.status & S_SELECTED) {
+            if (st.fix_mass) {
                 mass.status |= S_FIXED;
                 mass.status &= ~S_TEMPFIXED;
-            }
-            else
-            {
+            } else {
                 mass.status &= ~(S_FIXED | S_TEMPFIXED);
             }
         }
@@ -415,66 +369,54 @@ void MainWindow::fixedMassChanged(int state)
     ui->canvas->redraw();
 }
 
-void MainWindow::showSpringsChanged(int state)
-{
+void MainWindow::showSpringsChanged(int state) {
     State& st = system_.getState();
     if (updateBoolValue(st.show_spring, state))
         ui->canvas->redraw();
 }
 
-void MainWindow::adaptiveTimeStepChanged(int state)
-{
+void MainWindow::adaptiveTimeStepChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.adaptive_step, state);
 }
 
-void MainWindow::gridSnapChanged(int state)
-{
+void MainWindow::gridSnapChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.grid_snap, state);
 }
 
-void MainWindow::northChanged(int state)
-{
+void MainWindow::northChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.w_top, state);
 }
 
-void MainWindow::southChanged(int state)
-{
+void MainWindow::southChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.w_bottom, state);
 }
 
-void MainWindow::eastChanged(int state)
-{
+void MainWindow::eastChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.w_left, state);
 }
 
-void MainWindow::westChanged(int state)
-{
+void MainWindow::westChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.w_right, state);
 }
 
-void MainWindow::collideChanged(int state)
-{
+void MainWindow::collideChanged(int state) {
     State& st = system_.getState();
     updateBoolValue(st.collide, state);
 }
 
-void MainWindow::massValueChanged(double value)
-{
+void MainWindow::massValueChanged(double value) {
     State& st = system_.getState();
-    if (st.cur_mass != value)
-    {
+    if (st.cur_mass != value) {
         st.cur_mass = value;
-        for (int i = 0; i < system_.massCount(); ++i)
-        {
+        for (int i = 0; i < system_.massCount(); ++i) {
             Mass& mass = system_.getMass(i);
-            if (mass.status & S_SELECTED)
-            {
+            if (mass.status & S_SELECTED) {
                 mass.mass = st.cur_mass;
                 mass.radius = massRadius(st.cur_mass);
             }
@@ -483,14 +425,11 @@ void MainWindow::massValueChanged(double value)
     }
 }
 
-void MainWindow::elasticityValueChanged(double value)
-{
+void MainWindow::elasticityValueChanged(double value) {
     State& st = system_.getState();
-    if (st.cur_rest != value)
-    {
+    if (st.cur_rest != value) {
         st.cur_rest = value;
-        for (int i = 0; i < system_.massCount(); ++i)
-        {
+        for (int i = 0; i < system_.massCount(); ++i) {
             Mass& mass = system_.getMass(i);
             if (mass.status & S_SELECTED)
                 mass.elastic = st.cur_rest;
@@ -498,14 +437,11 @@ void MainWindow::elasticityValueChanged(double value)
     }
 }
 
-void MainWindow::kSpringValueChanged(double value)
-{
+void MainWindow::kSpringValueChanged(double value) {
     State& st = system_.getState();
-    if (st.cur_ks != value)
-    {
+    if (st.cur_ks != value) {
         st.cur_ks = value;
-        for (int i = 0; i < system_.springCount(); ++i)
-        {
+        for (int i = 0; i < system_.springCount(); ++i) {
             Spring& spring = system_.getSpring(i);
             if (spring.status & S_SELECTED)
                 spring.ks = st.cur_ks;
@@ -513,14 +449,11 @@ void MainWindow::kSpringValueChanged(double value)
     }
 }
 
-void MainWindow::kDampValueChanged(double value)
-{
+void MainWindow::kDampValueChanged(double value) {
     State& st = system_.getState();
-    if (st.cur_kd != value)
-    {
+    if (st.cur_kd != value) {
         st.cur_kd = value;
-        for (int i = 0; i < system_.springCount(); ++i)
-        {
+        for (int i = 0; i < system_.springCount(); ++i) {
             Spring& spring = system_.getSpring(i);
             if (spring.status & S_SELECTED)
                 spring.kd = st.cur_kd;
@@ -528,44 +461,37 @@ void MainWindow::kDampValueChanged(double value)
     }
 }
 
-void MainWindow::forceValueChanged(double value)
-{
+void MainWindow::forceValueChanged(double value) {
     State& st = system_.getState();
     st.cur_grav_val[force_] = value;
 }
 
-void MainWindow::miscValueChanged(double value)
-{
+void MainWindow::miscValueChanged(double value) {
     State& st = system_.getState();
     st.cur_misc_val[force_] = value;
 }
 
-void MainWindow::viscosityValueChanged(double value)
-{
+void MainWindow::viscosityValueChanged(double value) {
     State& st = system_.getState();
     st.cur_visc = value;
 }
 
-void MainWindow::stickinessValueChanged(double value)
-{
+void MainWindow::stickinessValueChanged(double value) {
     State& st = system_.getState();
     st.cur_stick = value;
 }
 
-void MainWindow::timeStepValueChanged(double value)
-{
+void MainWindow::timeStepValueChanged(double value) {
     State& st = system_.getState();
     st.cur_dt = value;
 }
 
-void MainWindow::precisionValueChanged(double value)
-{
+void MainWindow::precisionValueChanged(double value) {
     State& st = system_.getState();
     st.cur_prec = value;
 }
 
-void MainWindow::gridSnapValueChanged(int value)
-{
+void MainWindow::gridSnapValueChanged(int value) {
     State& st = system_.getState();
     st.cur_gsnap = value;
 }

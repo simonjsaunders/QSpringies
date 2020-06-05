@@ -28,8 +28,7 @@ namespace Ui { class MainWindow; }
 class QTimer;
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:

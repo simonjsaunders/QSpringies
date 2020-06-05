@@ -22,8 +22,7 @@
 
 class System;
 
-class Physics
-{
+class Physics {
 public:
     Physics(System&, int, int);
     bool advance();
