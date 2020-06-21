@@ -73,7 +73,7 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system) {
             num_map++;
             if (mass.mass < 0) {
                 mass.mass = -mass.mass;
-                mass.status |= S_FIXED;
+                mass.setFixed(true);
             }
             if (mass.mass == 0)
                 mass.mass = 1.0;
@@ -212,16 +212,16 @@ bool fileSave(const QString& fileName, System& system) {
     /* Masses and springs */
     for (int i = 0; i < system.massCount(); i++) {
         Mass& mass = system.getMass(i);
-        if (mass.status & S_ALIVE) {
+        if (mass.isAlive()) {
             out << "mass " << i << ' ' << mass.x << ' ' << mass.y
                 << ' ' << mass.vx << ' ' << mass.vy << ' '
-                << (mass.status & S_FIXED ? -mass.mass : mass.mass)
+                << (mass.isFixed() ? -mass.mass : mass.mass)
                 << ' ' << mass.elastic << '\n';
         }
     }
     for (int i = 0; i < system.springCount(); i++) {
         Spring& spring = system.getSpring(i);
-        if (spring.status & S_ALIVE) {
+        if (spring.isAlive()) {
             out << "spng " << i << ' ' << spring.m1 << ' ' << spring.m2 << ' '
                 << spring.ks << ' ' << spring.kd << ' ' << spring.restlen << '\n';
         }

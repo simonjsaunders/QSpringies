@@ -357,13 +357,9 @@ void MainWindow::fixedMassChanged(int state) {
         return;
     for (int i = 0; i < system_.massCount(); i++) {
         Mass& mass = system_.getMass(i);
-        if (mass.status & S_SELECTED) {
-            if (st.fix_mass) {
-                mass.status |= S_FIXED;
-                mass.status &= ~S_TEMPFIXED;
-            } else {
-                mass.status &= ~(S_FIXED | S_TEMPFIXED);
-            }
+        if (mass.isSelected()) {
+            mass.setFixed(st.fix_mass);
+            mass.setTempFixed(false);
         }
     }
     ui->canvas->redraw();
@@ -416,7 +412,7 @@ void MainWindow::massValueChanged(double value) {
         st.cur_mass = value;
         for (int i = 0; i < system_.massCount(); ++i) {
             Mass& mass = system_.getMass(i);
-            if (mass.status & S_SELECTED) {
+            if (mass.isSelected()) {
                 mass.mass = st.cur_mass;
                 mass.radius = massRadius(st.cur_mass);
             }
@@ -431,7 +427,7 @@ void MainWindow::elasticityValueChanged(double value) {
         st.cur_rest = value;
         for (int i = 0; i < system_.massCount(); ++i) {
             Mass& mass = system_.getMass(i);
-            if (mass.status & S_SELECTED)
+            if (mass.isSelected())
                 mass.elastic = st.cur_rest;
         }
     }
@@ -443,7 +439,7 @@ void MainWindow::kSpringValueChanged(double value) {
         st.cur_ks = value;
         for (int i = 0; i < system_.springCount(); ++i) {
             Spring& spring = system_.getSpring(i);
-            if (spring.status & S_SELECTED)
+            if (spring.isSelected())
                 spring.ks = st.cur_ks;
         }
     }
@@ -455,7 +451,7 @@ void MainWindow::kDampValueChanged(double value) {
         st.cur_kd = value;
         for (int i = 0; i < system_.springCount(); ++i) {
             Spring& spring = system_.getSpring(i);
-            if (spring.status & S_SELECTED)
+            if (spring.isSelected())
                 spring.kd = st.cur_kd;
         }
     }

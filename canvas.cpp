@@ -32,7 +32,7 @@ const int springThickness = 2;
 namespace {
 
 double distance(const QPoint& p1, const QPoint& p2) {
-    return sqrt(square(p1.x() - p2.x()) + square(p1.y() - p2.y()));
+    return hypot(p1.x() - p2.x(), p1.y() - p2.y());
 }
 
 QRect getBoundingBox(const QPoint& p1, const QPoint& p2, int margin) {
@@ -169,14 +169,14 @@ void Canvas::drawSystem() {
         QVector<QLine> lines, selectedLines;
         for (int i = 0, n = system_->springCount(); i < n; ++i) {
             const Spring& spring = system_->getSpring(i);
-            if (spring.status & S_ALIVE) {
+            if (spring.isAlive()) {
                 const Mass& m1 = system_->getMass(spring.m1);
                 const Mass& m2 = system_->getMass(spring.m2);
                 int x1 = COORD_X(m1.x);
                 int y1 = COORD_Y(m1.y);
                 int x2 = COORD_X(m2.x);
                 int y2 = COORD_Y(m2.y);
-                if (spring.status & S_SELECTED)
+                if (spring.isSelected())
                     selectedLines.push_back(QLine(x1, y1, x2, y2));
                 else
                     lines.push_back(QLine(x1, y1, x2, y2));
@@ -193,8 +193,8 @@ void Canvas::drawSystem() {
 
     for (int i = 0, n = system_->massCount(); i < n; ++i) {
         const Mass& mass = system_->getMass(i);
-        if (mass.status & S_ALIVE) {
-            bool fixed = (mass.status & S_FIXED) && !(mass.status & S_TEMPFIXED);
+        if (mass.isAlive()) {
+            bool fixed = mass.isFixed() && !mass.isTempFixed();
             int rad = fixed ? NAIL_SIZE : mass.radius;
             int size = sphereSize(rad);
             rad = sphereRadius(size);
@@ -205,7 +205,7 @@ void Canvas::drawSystem() {
                 circle.y = COORD_Y(mass.y) - rad;
                 circle.radius = rad;
                 circle.size = size;
-                if (mass.status & S_SELECTED)
+                if (mass.isSelected())
                     selectedCircles.push_back(circle);
                 else
                     circles.push_back(circle);
@@ -333,11 +333,11 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event) {
         m.radius = massRadius(state.cur_mass);
         m.elastic = state.cur_rest;
         if (state.fix_mass)
-            m.status |= S_FIXED;
+            m.setFixed(true);
         /* Select newly added mass */
         if (!shiftKeyDown_)
             system_->unselectAll();
-        m.status |= S_SELECTED;
+        m.setSelected(true);
         redraw();
     } else if (mode_ == ModeSpring) {
         const State& state = system_->getState();
@@ -370,7 +370,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event) {
             /* Select newly added spring */
             if (!shiftKeyDown_)
                 system_->unselectAll();
-            spring.status |= S_SELECTED;
+            spring.setSelected(true);
         }
         redraw();
     } else if (mode_ == ModeEdit) {

@@ -31,6 +31,32 @@
 struct Mass {
     Mass() : x(0), y(0), vx(0), vy(0), ax(0), ay(0), mass(0),
         elastic(0), radius(0), status(S_ALIVE) {}
+
+    bool isAlive() const { return (status & S_ALIVE) != 0; }
+    bool isSelected() const { return (status & S_SELECTED) != 0; }
+    bool isFixed() const { return (status & S_FIXED) != 0; }
+    bool isTempFixed() const { return (status & S_TEMPFIXED) != 0; }
+
+    void setFixed(bool fixed) {
+        if (fixed)
+            status |= S_FIXED;
+        else
+            status &= ~S_FIXED;
+    }
+    void setTempFixed(bool fixed) {
+        if (fixed)
+            status |= S_TEMPFIXED;
+        else
+            status &= ~S_TEMPFIXED;
+    }
+    void setSelected(bool selected) {
+        if (selected)
+            status |= S_SELECTED;
+        else
+            status &= ~S_SELECTED;
+    }
+    void toggleSelected() { status ^= S_SELECTED; }
+
     /* Current position, velocity, acceleration */
     double x, y;
     double vx, vy;
@@ -60,6 +86,24 @@ struct Mass {
 
 struct Spring {
     Spring() : ks(0), kd(0), restlen(0), m1(0), m2(0), status(S_ALIVE) {}
+
+    bool isAlive() const { return (status & S_ALIVE) != 0; }
+    bool isSelected() const { return (status & S_SELECTED) != 0; }
+
+    void setAlive(bool alive) {
+        if (alive)
+            status |= S_ALIVE;
+        else
+            status &= ~S_ALIVE;
+    }
+    void setSelected(bool selected) {
+        if (selected)
+            status |= S_SELECTED;
+        else
+            status &= ~S_SELECTED;
+    }
+    void toggleSelected() { status ^= S_SELECTED; }
+
     /* Ks, Kd and rest length of spring */
     double ks, kd;
     double restlen;
@@ -87,7 +131,7 @@ public:
     bool anythingSelected() const;
     int createMass();
     int createSpring();
-    int nearestObject(int, int, bool*);
+    int nearestObject(int, int, bool*) const;
     void deleteAll();
     void reconnectMasses();
     void setRestLenth();
