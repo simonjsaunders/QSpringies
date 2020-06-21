@@ -175,8 +175,8 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system) {
     return true;
 }
 
-bool fileSave(const QString& fileName, System& system) {
-    State& state = system.getState();
+bool fileSave(const QString& fileName, const System& system) {
+    const State& state = system.getState();
 
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -211,7 +211,7 @@ bool fileSave(const QString& fileName, System& system) {
 
     /* Masses and springs */
     for (int i = 0; i < system.massCount(); i++) {
-        Mass& mass = system.getMass(i);
+        const Mass& mass = system.getMass(i);
         if (mass.isAlive()) {
             out << "mass " << i << ' ' << mass.x << ' ' << mass.y
                 << ' ' << mass.vx << ' ' << mass.vy << ' '
@@ -220,7 +220,7 @@ bool fileSave(const QString& fileName, System& system) {
         }
     }
     for (int i = 0; i < system.springCount(); i++) {
-        Spring& spring = system.getSpring(i);
+        const Spring& spring = system.getSpring(i);
         if (spring.isAlive()) {
             out << "spng " << i << ' ' << spring.m1 << ' ' << spring.m2 << ' '
                 << spring.ks << ' ' << spring.kd << ' ' << spring.restlen << '\n';

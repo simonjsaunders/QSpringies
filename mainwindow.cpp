@@ -310,14 +310,14 @@ void MainWindow::forceCheckBoxChanged(int state) {
 }
 
 void MainWindow::updateForceControls() {
-    State& state = system_.getState();
+    const State& state = system_.getState();
     setChecked(ui->forceCheckBox, state.force_enabled[force_]);
     setValue(ui->forceSpinBox, state.cur_grav_val[force_]);
     setValue(ui->miscSpinBox, state.cur_misc_val[force_]);
 }
 
 void MainWindow::updateControls() {
-    State& state = system_.getState();
+    const State& state = system_.getState();
     setValue(ui->massSpinBox, state.cur_mass);
     setValue(ui->elasticitySpinBox, state.cur_rest);
     setValue(ui->kSpringSpinBox, state.cur_ks);
