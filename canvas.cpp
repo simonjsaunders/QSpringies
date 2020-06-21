@@ -428,8 +428,8 @@ void Canvas::gridSnap(int& x, int& y) {
     const State& state = system_->getState();
     if (state.grid_snap && mode_ != ModeEdit) {
         int gsnap = state.cur_gsnap;
-        x = ((x + (int)gsnap / 2) / (int)gsnap) * (int)gsnap;
-        y = ((y + (int)gsnap / 2) / (int)gsnap) * (int)gsnap;
+        x = ((x + gsnap / 2) / gsnap) * gsnap;
+        y = ((y + gsnap / 2) / gsnap) * gsnap;
     }
 }
 
