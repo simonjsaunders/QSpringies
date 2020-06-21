@@ -87,7 +87,7 @@ private:
     void updateForceControls();
     void readSettings();
     void writeSettings();
-    Ui::MainWindow *ui;
+    std::unique_ptr<Ui::MainWindow> ui;
     int force_;
     QString fileName_;
     QString currentDirectory_;

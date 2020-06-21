@@ -129,9 +129,7 @@ MainWindow::MainWindow(QWidget *parent)
     readSettings();
 }
 
-MainWindow::~MainWindow() {
-    delete ui;
-}
+MainWindow::~MainWindow() {}
 
 void MainWindow::readSettings() {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
