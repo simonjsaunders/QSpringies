@@ -20,8 +20,11 @@
 #ifndef MISC_H
 #define MISC_H
 
-#define COORD_DX(dx)	(dx)
-#define COORD_DY(dy)	(-(dy))
+template <typename NumericType>
+NumericType deltaX(NumericType dx) { return dx; }
+
+template <typename NumericType>
+NumericType deltaY(NumericType dy) { return -dy; }
 
 #define NAIL_SIZE	4
 

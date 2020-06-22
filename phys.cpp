@@ -59,8 +59,8 @@ void Physics::accumulateAccel() {
         gval = mst.cur_grav_val[FR_GRAV];
         gmisc = mst.cur_misc_val[FR_GRAV];
 
-        gx = COORD_DX(gval * sin(gmisc * M_PI / 180.0));
-        gy = COORD_DY(gval * cos(gmisc * M_PI / 180.0));
+        gx = deltaX(gval * sin(gmisc * M_PI / 180.0));
+        gy = deltaY(gval * cos(gmisc * M_PI / 180.0));
     }
     
     /* Keep center of mass in the middle force */

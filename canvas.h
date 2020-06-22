@@ -73,6 +73,13 @@ private:
     void gridSnap(int&, int&);
     void mouseVelocity(int&, int&);
     void drawRubberBand();
+
+    template <typename NumericType>
+    NumericType coordX(NumericType dx) { return dx; }
+
+    template <typename NumericType>
+    NumericType coordY(NumericType dy) { return height() - dy; }
+
     MouseMode mode_;
     std::unique_ptr<QPixmap> pixmap_;
     std::unique_ptr<QPixmap> spheres_[5];
