@@ -474,8 +474,9 @@ void System::setCenter() {
 
     for (i = 0; i < massCount(); i++) {
         if (masses_[i].isSelected()) {
+            if (cent != -1)
+                return;
             cent = i;
-            break;
         }
     }
     state_.center_id = cent;
