@@ -169,9 +169,9 @@ int System::nearestObject(int x, int y, bool* is_mass) const {
         const Mass& m = masses_[i];
         if (m.isAlive()) {
             int radius = screenRadius(m.radius);
-            if ((dist = square(m.x - (double)x) + square(m.y - (double)y)
-                 - (double)square(radius)) < min_dist) {
-                rating = square(m.x - (double)x) + square(m.y - (double)y);
+            if ((dist = square(m.x - x) + square(m.y - y)
+                 - square(radius)) < min_dist) {
+                rating = square(m.x - x) + square(m.y - y);
                 if (rating < min_rating) {
                     min_dist = dist;
                     min_rating = rating;

@@ -324,8 +324,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event) {
     if (mode_ == ModeMass) {
         const State& state = system_->getState();
         Mass& m = system_->getMass(system_->createMass());
-        m.x = coordX((double)mx);
-        m.y = coordY((double)my);
+        m.x = coordX(mx);
+        m.y = coordY(my);
         m.mass = state.cur_mass;
         m.radius = massRadius(state.cur_mass);
         m.elastic = state.cur_rest;
