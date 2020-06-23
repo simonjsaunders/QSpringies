@@ -75,10 +75,10 @@ private:
     void drawRubberBand();
 
     template <typename NumericType>
-    NumericType coordX(NumericType dx) { return dx; }
+    NumericType coordX(NumericType dx) const { return dx; }
 
     template <typename NumericType>
-    NumericType coordY(NumericType dy) { return height() - dy; }
+    NumericType coordY(NumericType dy) const { return height() - dy; }
 
     MouseMode mode_;
     std::unique_ptr<QPixmap> pixmap_;
