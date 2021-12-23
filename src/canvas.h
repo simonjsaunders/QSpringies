@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QTime>
+#include <memory>
 
 class System;
 

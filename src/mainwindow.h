@@ -21,6 +21,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <memory>
 #include "system.h"
 
 QT_BEGIN_NAMESPACE

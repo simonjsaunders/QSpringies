@@ -21,6 +21,7 @@
 #include "misc.h"
 #include <float.h>
 #include <math.h>
+#include <algorithm>
 
 const double MPROXIMITY	= 8.0;
 const double SPROXIMITY	= 8.0;
