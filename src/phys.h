@@ -26,6 +26,7 @@ class Physics {
 public:
     Physics(System&, int, int);
     bool advance();
+
 private:
     void accumulateAccel();
     void rungeKutta(double, bool);

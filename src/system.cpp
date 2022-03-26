@@ -19,12 +19,12 @@
 
 #include "system.h"
 #include "misc.h"
+#include <algorithm>
 #include <float.h>
 #include <math.h>
-#include <algorithm>
 
-const double MPROXIMITY	= 8.0;
-const double SPROXIMITY	= 8.0;
+const double MPROXIMITY = 8.0;
+const double SPROXIMITY = 8.0;
 
 System::System() {
     initObjects();
@@ -156,7 +156,8 @@ void System::reconnectMasses() {
    */
 int System::nearestObject(int x, int y, bool* is_mass) const {
     int i, closest = -1;
-    double dist, min_dist = MPROXIMITY * MPROXIMITY, rating, min_rating = DBL_MAX;
+    double dist, min_dist = MPROXIMITY * MPROXIMITY, rating,
+                 min_rating = DBL_MAX;
     bool masses_only = *is_mass;
     int n = massCount();
 
@@ -170,8 +171,8 @@ int System::nearestObject(int x, int y, bool* is_mass) const {
         const Mass& m = masses_[i];
         if (m.isAlive()) {
             int radius = screenRadius(m.radius);
-            if ((dist = square(m.x - x) + square(m.y - y)
-                 - square(radius)) < min_dist) {
+            if ((dist = square(m.x - x) + square(m.y - y) - square(radius)) <
+                min_dist) {
                 rating = square(m.x - x) + square(m.y - y);
                 if (rating < min_rating) {
                     min_dist = dist;
@@ -203,8 +204,10 @@ int System::nearestObject(int x, int y, bool* is_mass) const {
             x2 = masses_[springs_[i].m2].x;
             y2 = masses_[springs_[i].m2].y;
 
-            if (x > std::min(x1, x2) - SPROXIMITY && x < std::max(x1, x2) + SPROXIMITY &&
-                    y > std::min(y1, y2) - SPROXIMITY && y < std::max(y1, y2) + SPROXIMITY) {
+            if (x > std::min(x1, x2) - SPROXIMITY &&
+                x < std::max(x1, x2) + SPROXIMITY &&
+                y > std::min(y1, y2) - SPROXIMITY &&
+                y < std::max(y1, y2) + SPROXIMITY) {
                 double a1, b1, c1, dAB, d;
 
                 a1 = y2 - y1;
@@ -343,7 +346,7 @@ void System::selectObjects(int ulx, int uly, int lrx, int lry) {
             const Mass& m2 = masses_[springs_[i].m2];
 
             if (ulx <= m1.x && m1.x <= lrx && uly <= m1.y && m1.y <= lry &&
-                    ulx <= m2.x && m2.x <= lrx && uly <= m2.y && m2.y <= lry)
+                ulx <= m2.x && m2.x <= lrx && uly <= m2.y && m2.y <= lry)
                 selectObject(i, false, false);
         }
     }

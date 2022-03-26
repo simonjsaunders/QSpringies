@@ -44,12 +44,12 @@ QRect getBoundingBox(const QPoint& p1, const QPoint& p2, int margin) {
     return rect;
 }
 
-}
+} // namespace
 
-Canvas::Canvas(QWidget *parent) : QWidget(parent), mode_(ModeEdit),
-    system_(nullptr), mouseDown_(false), staticSpring_(false), action_(false),
-    selection_(-1), mouseOffset_(0), shiftKeyDown_(false),
-    mouseButton_(Qt::NoButton) {
+Canvas::Canvas(QWidget* parent)
+    : QWidget(parent), mode_(ModeEdit), system_(nullptr), mouseDown_(false),
+      staticSpring_(false), action_(false), selection_(-1), mouseOffset_(0),
+      shiftKeyDown_(false), mouseButton_(Qt::NoButton) {
     spheres_[0].reset(new QPixmap(":/images/sphere30.png"));
     spheres_[1].reset(new QPixmap(":/images/sphere40.png"));
     spheres_[2].reset(new QPixmap(":/images/sphere50.png"));
@@ -117,7 +117,8 @@ void Canvas::drawMass(QPainter& painter, const Circle& circle, bool selected) {
     int size = circle.size;
     QRect target(circle.x, circle.y, rad * 2, rad * 2);
     QRect source(0, 0, rad * 2, rad * 2);
-    painter.drawPixmap(target, selected ? *selectedSpheres_[size] : *spheres_[size], source);
+    painter.drawPixmap(
+        target, selected ? *selectedSpheres_[size] : *spheres_[size], source);
 }
 
 void Canvas::drawSpring(const QPoint& p1, const QPoint& p2) {
@@ -133,7 +134,8 @@ void Canvas::drawSpring(const QPoint& p1, const QPoint& p2) {
     update(rect_);
 }
 
-void Canvas::drawSprings(QPainter& painter, const QVector<QLine>& lines, bool selected) {
+void Canvas::drawSprings(QPainter& painter, const QVector<QLine>& lines,
+                         bool selected) {
     QPen pen(selected ? selectedColour : springColor);
     pen.setWidth(springThickness);
     pen.setJoinStyle(Qt::RoundJoin);
@@ -195,8 +197,10 @@ void Canvas::drawSystem() {
             int rad = fixed ? NAIL_SIZE : mass.radius;
             int size = sphereSize(rad);
             rad = sphereRadius(size);
-            if (coordX(mass.x + rad) >= 0 && coordX(mass.x - rad) <= screenWidth &&
-                    coordY(mass.y - rad) >= 0 && coordY(mass.y + rad) <= screenHeight) {
+            if (coordX(mass.x + rad) >= 0 &&
+                coordX(mass.x - rad) <= screenWidth &&
+                coordY(mass.y - rad) >= 0 &&
+                coordY(mass.y + rad) <= screenHeight) {
                 Circle circle;
                 circle.x = coordX(mass.x) - rad;
                 circle.y = coordY(mass.y) - rad;
@@ -219,7 +223,7 @@ void Canvas::drawSystem() {
     painter2.drawPixmap(screenRect, *systemPixmap_.get(), screenRect);
 }
 
-void Canvas::mouseMoveEvent(QMouseEvent *event) {
+void Canvas::mouseMoveEvent(QMouseEvent* event) {
     if (system_ == nullptr || !mouseDown_)
         return;
 
@@ -256,14 +260,15 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
             }
         } else {
             /* Move objects relative to mouse */
-            system_->moveSelectedMasses(deltaX(mx - endPoint_.x()), deltaY(my - endPoint_.y()));
+            system_->moveSelectedMasses(deltaX(mx - endPoint_.x()),
+                                        deltaY(my - endPoint_.y()));
             redraw();
             endPoint_ = event->pos();
         }
     }
 }
 
-void Canvas::mousePressEvent(QMouseEvent *event) {
+void Canvas::mousePressEvent(QMouseEvent* event) {
     if (system_ == nullptr || mouseDown_)
         return;
     shiftKeyDown_ = ((event->modifiers() & Qt::ShiftModifier) != 0);
@@ -301,7 +306,8 @@ void Canvas::mousePressEvent(QMouseEvent *event) {
         endPoint_ = startPoint_;
         if (mouseButton_ == Qt::LeftButton) {
             bool isMass = false;
-            selection_ = system_->nearestObject(coordX(mx), coordY(my), &isMass);
+            selection_ =
+                system_->nearestObject(coordX(mx), coordY(my), &isMass);
 
             /* If not shift clicking, unselect all currently selected items */
             if (!shiftKeyDown_) {
@@ -314,7 +320,7 @@ void Canvas::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-void Canvas::mouseReleaseEvent(QMouseEvent *event) {
+void Canvas::mouseReleaseEvent(QMouseEvent* event) {
     if (system_ == nullptr || !mouseDown_)
         return;
     mouseDown_ = false;
@@ -345,8 +351,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event) {
             system_->killFakeSpring();
 
         selection_ = system_->nearestObject(coordX(mx), coordY(my), &isMass);
-        if ((staticSpring_ || !action_ || mouseButton_ == Qt::RightButton)
-                && selection_ >= 0 && isMass && selection_ != startSel) {
+        if ((staticSpring_ || !action_ || mouseButton_ == Qt::RightButton) &&
+            selection_ >= 0 && isMass && selection_ != startSel) {
             const Mass& startMass = system_->getMass(startSel);
             const Mass& endMass = system_->getMass(selection_);
 
@@ -373,16 +379,18 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event) {
     } else if (mode_ == ModeEdit) {
         if (mouseButton_ == Qt::LeftButton) {
             if (selection_ < 0) {
-                system_->selectObjects(std::min(coordX(startPoint_.x()), coordX(mx)),
-                                        std::min(coordY(startPoint_.y()), coordY(my)),
-                                        std::max(coordX(startPoint_.x()), coordX(mx)),
-                                        std::max(coordY(startPoint_.y()), coordY(my)));
+                system_->selectObjects(
+                    std::min(coordX(startPoint_.x()), coordX(mx)),
+                    std::min(coordY(startPoint_.y()), coordY(my)),
+                    std::max(coordX(startPoint_.x()), coordX(mx)),
+                    std::max(coordY(startPoint_.y()), coordY(my)));
                 if (system_->evalSelection())
                     emit updateControls();
                 redraw();
             } else {
                 bool isMass = false;
-                selection_ = system_->nearestObject(coordX(mx), coordY(my), &isMass);
+                selection_ =
+                    system_->nearestObject(coordX(mx), coordY(my), &isMass);
                 if (selection_ >= 0) {
                     system_->selectObject(selection_, isMass, shiftKeyDown_);
                     if (system_->evalSelection())

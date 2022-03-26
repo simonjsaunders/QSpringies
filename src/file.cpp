@@ -21,11 +21,11 @@
 #include "misc.h"
 #include "system.h"
 #include <QFile>
-#include <QtGlobal>
 #include <QTextStream>
+#include <QtGlobal>
 
-#define MAGIC_CMD	"#1.0"
-#define FILE_EXT	".xsp"
+#define MAGIC_CMD "#1.0"
+#define FILE_EXT  ".xsp"
 
 QString extendFile(const QString& file) {
     QString result = file;
@@ -68,7 +68,8 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system) {
             mapto.push_back(which);
             Mass& mass = system.getMass(which);
             int mass_num;
-            in >> mass_num >> mass.x >> mass.y >> mass.vx >> mass.vy >> mass.mass >> mass.elastic;
+            in >> mass_num >> mass.x >> mass.y >> mass.vx >> mass.vy >>
+                mass.mass >> mass.elastic;
             mapfrom.push_back(mass_num);
             num_map++;
             if (mass.mass < 0) {
@@ -85,7 +86,8 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system) {
             int bogus;
             int which = system.createSpring();
             Spring& spring = system.getSpring(which);
-            in >> bogus >> spring.m1 >> spring.m2 >> spring.ks >> spring.kd >> spring.restlen;
+            in >> bogus >> spring.m1 >> spring.m2 >> spring.ks >> spring.kd >>
+                spring.restlen;
             if (selectNew)
                 system.selectObject(which, false, false);
         } else if (command == FileInsert) {
@@ -112,7 +114,8 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system) {
             int which, temp;
             in >> which;
             if (which >= 0 && which < BF_NUM) {
-                in >> temp >> state.cur_grav_val[which] >> state.cur_misc_val[which];
+                in >> temp >> state.cur_grav_val[which] >>
+                    state.cur_misc_val[which];
                 state.force_enabled[which] = temp != 0;
             } else if (which == BF_NUM) {
                 in >> temp;
@@ -134,7 +137,7 @@ bool fileLoad(const QString& fileName, FileCmd command, System& system) {
         } else if (cmd == "gsnp") {
             int temp;
             in >> state.cur_gsnap >> temp;
-            state.grid_snap = temp  != 0;
+            state.grid_snap = temp != 0;
         } else if (cmd == "wall") {
             int wt, wl, wr, wb;
             in >> wt >> wl >> wr >> wb;
@@ -195,8 +198,8 @@ bool fileSave(const QString& fileName, const System& system) {
     out << "cent " << state.center_id << '\n';
 
     for (int i = 0; i < BF_NUM; i++) {
-        out << "frce " << i << ' ' << (state.force_enabled[i] ? 1 : 0)
-            << ' ' << state.cur_grav_val[i] << ' ' << state.cur_misc_val[i] << '\n';
+        out << "frce " << i << ' ' << (state.force_enabled[i] ? 1 : 0) << ' '
+            << state.cur_grav_val[i] << ' ' << state.cur_misc_val[i] << '\n';
     }
 
     out << "frce " << BF_NUM << ' ' << (state.collide ? 1 : 0) << " 0 0\n";
@@ -205,7 +208,8 @@ bool fileSave(const QString& fileName, const System& system) {
     out << "step " << state.cur_dt << '\n';
     out << "prec " << state.cur_prec << '\n';
     out << "adpt " << state.adaptive_step << '\n';
-    out << "gsnp " << state.cur_gsnap << ' ' << (state.grid_snap ? 1 : 0) << '\n';
+    out << "gsnp " << state.cur_gsnap << ' ' << (state.grid_snap ? 1 : 0)
+        << '\n';
     out << "wall " << (int)state.w_top << ' ' << (int)state.w_left << ' '
         << (int)state.w_right << ' ' << (int)state.w_bottom << '\n';
 
@@ -213,17 +217,18 @@ bool fileSave(const QString& fileName, const System& system) {
     for (int i = 0; i < system.massCount(); i++) {
         const Mass& mass = system.getMass(i);
         if (mass.isAlive()) {
-            out << "mass " << i << ' ' << mass.x << ' ' << mass.y
-                << ' ' << mass.vx << ' ' << mass.vy << ' '
-                << (mass.isFixed() ? -mass.mass : mass.mass)
-                << ' ' << mass.elastic << '\n';
+            out << "mass " << i << ' ' << mass.x << ' ' << mass.y << ' '
+                << mass.vx << ' ' << mass.vy << ' '
+                << (mass.isFixed() ? -mass.mass : mass.mass) << ' '
+                << mass.elastic << '\n';
         }
     }
     for (int i = 0; i < system.springCount(); i++) {
         const Spring& spring = system.getSpring(i);
         if (spring.isAlive()) {
             out << "spng " << i << ' ' << spring.m1 << ' ' << spring.m2 << ' '
-                << spring.ks << ' ' << spring.kd << ' ' << spring.restlen << '\n';
+                << spring.ks << ' ' << spring.kd << ' ' << spring.restlen
+                << '\n';
         }
     }
     return true;

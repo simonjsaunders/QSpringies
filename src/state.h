@@ -20,14 +20,14 @@
 #ifndef STATE_H
 #define STATE_H
 
-#define BF_NUM		4
-#define DEF_TSTEP	0.025
+#define BF_NUM    4
+#define DEF_TSTEP 0.025
 
 /* Forces */
-#define FR_GRAV		0
-#define FR_CMASS	1
-#define FR_PTATTRACT	2
-#define FR_WALL		3
+#define FR_GRAV      0
+#define FR_CMASS     1
+#define FR_PTATTRACT 2
+#define FR_WALL      3
 
 struct State {
     State();

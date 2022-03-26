@@ -20,17 +20,18 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <vector>
 #include "state.h"
+#include <vector>
 
-#define S_ALIVE		0x01
-#define S_SELECTED	0x02
-#define S_FIXED		0x04
-#define S_TEMPFIXED	0x08
+#define S_ALIVE     0x01
+#define S_SELECTED  0x02
+#define S_FIXED     0x04
+#define S_TEMPFIXED 0x08
 
 struct Mass {
-    Mass() : x(0), y(0), vx(0), vy(0), ax(0), ay(0), mass(0),
-        elastic(0), radius(0), status(S_ALIVE) {}
+    Mass()
+        : x(0), y(0), vx(0), vy(0), ax(0), ay(0), mass(0), elastic(0),
+          radius(0), status(S_ALIVE) {}
 
     bool isAlive() const { return (status & S_ALIVE) != 0; }
     bool isSelected() const { return (status & S_SELECTED) != 0; }
@@ -155,6 +156,7 @@ public:
     void reset();
     bool isFakeMass(int mass) const { return mass == fakeMass_; }
     bool isFakeSpring(int spring) const { return spring == fakeSpring_; }
+
 private:
     void initObjects();
     State state_;

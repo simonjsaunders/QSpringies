@@ -33,7 +33,7 @@ int massRadius(double m) {
 }
 
 int sphereSize(int rad) {
-    rad = (25 + (2 * rad))/2;
+    rad = (25 + (2 * rad)) / 2;
     if (rad < 15)
         rad = 15;
     int size = 0;
@@ -45,5 +45,5 @@ int sphereSize(int rad) {
 }
 
 int sphereRadius(int size) {
-    return (size*10 + 30)/2;
+    return (size * 10 + 30) / 2;
 }

@@ -20,38 +20,35 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-#include <QWidget>
 #include <QPixmap>
 #include <QTime>
+#include <QWidget>
 #include <memory>
 
 class System;
 
-enum MouseMode {
-    ModeEdit,
-    ModeMass,
-    ModeSpring
-};
+enum MouseMode { ModeEdit, ModeMass, ModeSpring };
 
 /* Number of previous mouse state saves */
-#define MOUSE_PREV	4
+#define MOUSE_PREV 4
 
 class Canvas : public QWidget {
     Q_OBJECT
 public:
-    explicit Canvas(QWidget *parent = nullptr);
+    explicit Canvas(QWidget* parent = nullptr);
     MouseMode mouseMode() const;
     void setMouseMode(MouseMode);
     void setSystem(System*);
     System* getSystem();
     void redraw();
     void setAction(bool);
+
 protected:
-    void paintEvent(QPaintEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
 signals:
     void updateControls();
@@ -75,11 +72,13 @@ private:
     void mouseVelocity(int&, int&);
     void drawRubberBand();
 
-    template <typename NumericType>
-    NumericType coordX(NumericType dx) const { return dx; }
+    template <typename NumericType> NumericType coordX(NumericType dx) const {
+        return dx;
+    }
 
-    template <typename NumericType>
-    NumericType coordY(NumericType dy) const { return height() - dy; }
+    template <typename NumericType> NumericType coordY(NumericType dy) const {
+        return height() - dy;
+    }
 
     MouseMode mode_;
     std::unique_ptr<QPixmap> pixmap_;

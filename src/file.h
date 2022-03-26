@@ -22,12 +22,7 @@
 
 #include <QString>
 
-enum FileCmd {
-    FileNone,
-    FileLoad,
-    FileSave,
-    FileInsert
-};
+enum FileCmd { FileNone, FileLoad, FileSave, FileInsert };
 
 class System;
 

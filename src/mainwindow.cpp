@@ -18,10 +18,10 @@
  */
 
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "file.h"
 #include "misc.h"
 #include "phys.h"
+#include "ui_mainwindow.h"
 #include "version.h"
 
 #include <QFileDialog>
@@ -53,10 +53,8 @@ void setValue(QSpinBox* spinBox, int value) {
     spinBox->setValue(value);
 }
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    force_(0) {
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), force_(0) {
     ui->setupUi(this);
 
     ui->canvas->setSystem(&system_);
@@ -72,54 +70,88 @@ MainWindow::MainWindow(QWidget *parent)
     ui->forceComboBox->addItem(tr("Wall Repel/Attract"));
     forceComboChanged(force_);
 
-    connect(ui->actionFileOpen, &QAction::triggered, this, &MainWindow::fileOpen);
-    connect(ui->actionFileInsert, &QAction::triggered, this, &MainWindow::fileInsert);
-    connect(ui->actionFileSave, &QAction::triggered, this, &MainWindow::fileSave);
-    connect(ui->actionFileSaveAs, &QAction::triggered, this, &MainWindow::fileSaveAs);
+    connect(ui->actionFileOpen, &QAction::triggered, this,
+            &MainWindow::fileOpen);
+    connect(ui->actionFileInsert, &QAction::triggered, this,
+            &MainWindow::fileInsert);
+    connect(ui->actionFileSave, &QAction::triggered, this,
+            &MainWindow::fileSave);
+    connect(ui->actionFileSaveAs, &QAction::triggered, this,
+            &MainWindow::fileSaveAs);
 
-    connect(ui->actionDuplicate, &QAction::triggered, this, &MainWindow::editDuplicate);
-    connect(ui->actionDelete, &QAction::triggered, this, &MainWindow::editDelete);
-    connect(ui->actionSelectAll, &QAction::triggered, this, &MainWindow::editSelectAll);
+    connect(ui->actionDuplicate, &QAction::triggered, this,
+            &MainWindow::editDuplicate);
+    connect(ui->actionDelete, &QAction::triggered, this,
+            &MainWindow::editDelete);
+    connect(ui->actionSelectAll, &QAction::triggered, this,
+            &MainWindow::editSelectAll);
 
-    connect(ui->actionRestoreState, &QAction::triggered, this, &MainWindow::stateRestore);
-    connect(ui->actionResetState, &QAction::triggered, this, &MainWindow::stateReset);
-    connect(ui->actionSaveState, &QAction::triggered, this, &MainWindow::stateSave);
+    connect(ui->actionRestoreState, &QAction::triggered, this,
+            &MainWindow::stateRestore);
+    connect(ui->actionResetState, &QAction::triggered, this,
+            &MainWindow::stateReset);
+    connect(ui->actionSaveState, &QAction::triggered, this,
+            &MainWindow::stateSave);
 
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionAboutQt, &QAction::triggered, this, &MainWindow::aboutQt);
 
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(start()));
-    connect(ui->setRestLengthButton, SIGNAL(clicked()), this, SLOT(setRestLen()));
+    connect(ui->setRestLengthButton, SIGNAL(clicked()), this,
+            SLOT(setRestLen()));
     connect(ui->setCenterButton, SIGNAL(clicked()), this, SLOT(setCenter()));
 
     connect(ui->editButton, SIGNAL(clicked()), this, SLOT(editButtonClicked()));
     connect(ui->massButton, SIGNAL(clicked()), this, SLOT(massButtonClicked()));
-    connect(ui->springButton, SIGNAL(clicked()), this, SLOT(springButtonClicked()));
+    connect(ui->springButton, SIGNAL(clicked()), this,
+            SLOT(springButtonClicked()));
 
-    connect(ui->fixedMassCheckBox, SIGNAL(stateChanged(int)), this, SLOT(fixedMassChanged(int)));
-    connect(ui->showSpringsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(showSpringsChanged(int)));
-    connect(ui->adaptiveCheckBox, SIGNAL(stateChanged(int)), this, SLOT(adaptiveTimeStepChanged(int)));
-    connect(ui->gridSnapCheckBox, SIGNAL(stateChanged(int)), this, SLOT(gridSnapChanged(int)));
-    connect(ui->northCheckBox, SIGNAL(stateChanged(int)), this, SLOT(northChanged(int)));
-    connect(ui->southCheckBox, SIGNAL(stateChanged(int)), this, SLOT(southChanged(int)));
-    connect(ui->eastCheckBox, SIGNAL(stateChanged(int)), this, SLOT(eastChanged(int)));
-    connect(ui->westCheckBox, SIGNAL(stateChanged(int)), this, SLOT(westChanged(int)));
-    connect(ui->collideCheckBox, SIGNAL(stateChanged(int)), this, SLOT(collideChanged(int)));
+    connect(ui->fixedMassCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(fixedMassChanged(int)));
+    connect(ui->showSpringsCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(showSpringsChanged(int)));
+    connect(ui->adaptiveCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(adaptiveTimeStepChanged(int)));
+    connect(ui->gridSnapCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(gridSnapChanged(int)));
+    connect(ui->northCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(northChanged(int)));
+    connect(ui->southCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(southChanged(int)));
+    connect(ui->eastCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(eastChanged(int)));
+    connect(ui->westCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(westChanged(int)));
+    connect(ui->collideCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(collideChanged(int)));
 
-    connect(ui->massSpinBox, SIGNAL(valueChanged(double)), this, SLOT(massValueChanged(double)));
-    connect(ui->elasticitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(elasticityValueChanged(double)));
-    connect(ui->kSpringSpinBox, SIGNAL(valueChanged(double)), this, SLOT(kSpringValueChanged(double)));
-    connect(ui->kDampSpinBox, SIGNAL(valueChanged(double)), this, SLOT(kDampValueChanged(double)));
-    connect(ui->forceSpinBox, SIGNAL(valueChanged(double)), this, SLOT(forceValueChanged(double)));
-    connect(ui->miscSpinBox, SIGNAL(valueChanged(double)), this, SLOT(miscValueChanged(double)));
-    connect(ui->viscositySpinBox, SIGNAL(valueChanged(double)), this, SLOT(viscosityValueChanged(double)));
-    connect(ui->stickinessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(stickinessValueChanged(double)));
-    connect(ui->timeStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(timeStepValueChanged(double)));
-    connect(ui->precisionSpinBox, SIGNAL(valueChanged(double)), this, SLOT(precisionValueChanged(double)));
-    connect(ui->gridSnapSpinBox, SIGNAL(valueChanged(int)), this, SLOT(gridSnapValueChanged(int)));
+    connect(ui->massSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(massValueChanged(double)));
+    connect(ui->elasticitySpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(elasticityValueChanged(double)));
+    connect(ui->kSpringSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(kSpringValueChanged(double)));
+    connect(ui->kDampSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(kDampValueChanged(double)));
+    connect(ui->forceSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(forceValueChanged(double)));
+    connect(ui->miscSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(miscValueChanged(double)));
+    connect(ui->viscositySpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(viscosityValueChanged(double)));
+    connect(ui->stickinessSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(stickinessValueChanged(double)));
+    connect(ui->timeStepSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(timeStepValueChanged(double)));
+    connect(ui->precisionSpinBox, SIGNAL(valueChanged(double)), this,
+            SLOT(precisionValueChanged(double)));
+    connect(ui->gridSnapSpinBox, SIGNAL(valueChanged(int)), this,
+            SLOT(gridSnapValueChanged(int)));
 
-    connect(ui->forceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(forceComboChanged(int)));
-    connect(ui->forceCheckBox, SIGNAL(stateChanged(int)), this, SLOT(forceCheckBoxChanged(int)));
+    connect(ui->forceComboBox, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(forceComboChanged(int)));
+    connect(ui->forceCheckBox, SIGNAL(stateChanged(int)), this,
+            SLOT(forceCheckBoxChanged(int)));
 
     connect(ui->canvas, SIGNAL(updateControls()), this, SLOT(updateControls()));
 
@@ -132,15 +164,18 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {}
 
 void MainWindow::readSettings() {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+    QSettings settings(QCoreApplication::organizationName(),
+                       QCoreApplication::applicationName());
+    const QByteArray geometry =
+        settings.value("geometry", QByteArray()).toByteArray();
     if (!geometry.isEmpty())
         restoreGeometry(geometry);
     currentDirectory_ = settings.value("directory", "").toString();
 }
 
 void MainWindow::writeSettings() {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings(QCoreApplication::organizationName(),
+                       QCoreApplication::applicationName());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("directory", currentDirectory_);
 }
@@ -150,31 +185,34 @@ void MainWindow::closeEvent(QCloseEvent* /*event*/) {
 }
 
 void MainWindow::about() {
-   QMessageBox::about(this, tr("About QSpringies"),
-        tr("<p>QSpringies Version %1</p>"
-           "<p>Copyright &copy; %2 Simon J. Saunders</p>"
-           "<p>QSpringies is a mass and spring simulation system implemented with Qt.</p>"
-           "<p>It is based on XSpringies by Douglas M. DeCarlo.</p>"
-           "<p>QSpringies is free software: you can redistribute it and/or modify "
-           "it under the terms of the GNU General Public License as published by "
-           "the Free Software Foundation, either version 3 of the License, or "
-           "(at your option) any later version.</p>"
-           "<p>QSpringies is distributed in the hope that it will be useful, "
-           "but WITHOUT ANY WARRANTY; without even the implied warranty of "
-           "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
-           "GNU General Public License for more details.</p>"
-           "<p>You should have received a copy of the GNU General Public License "
-           "along with QSpringies. If not, see "
-           "<a href='https://www.gnu.org/licenses/'>https://www.gnu.org/licenses/</a>.</p>"
-           ).arg(QStringLiteral(VERSION_NUMBER), QStringLiteral(COPYRIGHT_YEAR)));
+    QMessageBox::about(
+        this, tr("About QSpringies"),
+        tr("<p>QSpringies Version %1</p><p>Copyright &copy; %2 Simon J. "
+           "Saunders</p><p>QSpringies is a mass and spring simulation system "
+           "implemented with Qt.</p><p>It is based on XSpringies by Douglas M. "
+           "DeCarlo.</p><p>QSpringies is free software: you can redistribute "
+           "it and/or modify it under the terms of the GNU General Public "
+           "License as published by the Free Software Foundation, either "
+           "version 3 of the License, or (at your option) any later "
+           "version.</p><p>QSpringies is distributed in the hope that it will "
+           "be useful, but WITHOUT ANY WARRANTY; without even the implied "
+           "warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. "
+           "See the GNU General Public License for more details.</p><p>You "
+           "should have received a copy of the GNU General Public License "
+           "along with QSpringies. If not, see <a "
+           "href='https://www.gnu.org/licenses/'>https://www.gnu.org/licenses/"
+           "</a>.</p>")
+            .arg(QStringLiteral(VERSION_NUMBER),
+                 QStringLiteral(COPYRIGHT_YEAR)));
 }
 
 void MainWindow::aboutQt() {
-   QMessageBox::aboutQt(this, tr("About Qt"));
+    QMessageBox::aboutQt(this, tr("About Qt"));
 }
 
 void MainWindow::fileOpen() {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), currentDirectory_, tr("XSpringies (*.xsp)"));
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Open File"), currentDirectory_, tr("XSpringies (*.xsp)"));
     if (fileName.isEmpty())
         return;
     if (!fileCommand(fileName, FileLoad, system_)) {
@@ -194,7 +232,8 @@ void MainWindow::setCurrentFile(const QString& fileName) {
 }
 
 void MainWindow::fileInsert() {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Insert File"), currentDirectory_, tr("XSpringies (*.xsp)"));
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Insert File"), currentDirectory_, tr("XSpringies (*.xsp)"));
     if (fileName.isEmpty())
         return;
     if (!fileCommand(fileName, FileInsert, system_))
@@ -210,7 +249,8 @@ void MainWindow::fileSave() {
 }
 
 void MainWindow::fileSaveAs() {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), currentDirectory_, tr("XSpringies (*.xsp)"));
+    QString fileName = QFileDialog::getSaveFileName(
+        this, tr("Save File"), currentDirectory_, tr("XSpringies (*.xsp)"));
     if (fileName.isEmpty())
         return;
     if (!fileCommand(fileName, FileSave, system_)) {
@@ -287,12 +327,16 @@ void MainWindow::tick() {
 }
 
 void MainWindow::forceComboChanged(int index) {
-    static const char *forceNames[BF_NUM] = { "Gravity:", "Magnitude:", "Magnitude:", "Magnitude:" };
-    static const char *miscNames[BF_NUM] = { "Direction:", "Damping:", "Exponent:", "Exponent:" };
-    static double maxForceValue[BF_NUM] = { 10000000.0, 10000000.0, 10000000.0, 10000000.0 };
-    static double minForceValue[BF_NUM] = { 0.0, -10000000.0, -10000000.0, -10000000.0 };
-    static double maxMiscValue[BF_NUM] = { 360.0, 10000000.0, 1000.0, 1000.0 };
-    static double minMiscValue[BF_NUM] = { -360.0, 0.0, 0.0, -0.0 };
+    static const char* forceNames[BF_NUM] = {
+        "Gravity:", "Magnitude:", "Magnitude:", "Magnitude:"};
+    static const char* miscNames[BF_NUM] = {
+        "Direction:", "Damping:", "Exponent:", "Exponent:"};
+    static double maxForceValue[BF_NUM] = {10000000.0, 10000000.0, 10000000.0,
+                                           10000000.0};
+    static double minForceValue[BF_NUM] = {0.0, -10000000.0, -10000000.0,
+                                           -10000000.0};
+    static double maxMiscValue[BF_NUM] = {360.0, 10000000.0, 1000.0, 1000.0};
+    static double minMiscValue[BF_NUM] = {-360.0, 0.0, 0.0, -0.0};
 
     force_ = index;
     ui->forceLabel->setText(tr(forceNames[index]));
